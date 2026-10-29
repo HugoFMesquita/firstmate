@@ -1,0 +1,27 @@
+harness=pi
+--- before:
+mode: quiet
+--- session-start (posture/quiet lines):
+Archived a leftover quiet-mode record (/tmp/fm-lab.6ZM1ZQ/state/afk-contracts/1793295292.afk-contract): quiet mode writes no record on Pi, and the captain stays present.
+- Lock: held by this session; this session owns normal supervision unless away mode says otherwise.
+- Away/quiet mode: inactive.
+When this session owns supervision, in either posture:
+While an away-posture record `state/.afk-contract` exists (a record whose mode is quiet is a present captain and parks nothing) the branch takes every row instead, this conversation receives no processing request, and main's standing authority relocates to the branch through the guarded scripts; a wake the branch cannot take and every watcher-failure alarm still reach this conversation, and the first run boundary after the record is archived presents what accumulated (docs/pi-supervision-branch.md "Postures").
+A captain-facing outcome instead appears as one exact, sequence-keyed visible transcript entry, and while attended then arrives in this conversation as one hidden supervision processing request listing each `[seq N, recorded <age> ago] task: summary` it covers; outcomes recorded while away wait for that request until the record is archived.
+Regression example - keep verbatim and never condense away: `[seq 41] claude-mod: implementation complete, ready for review` requires relaying a captain-facing outcome response, not just `Captain, shipshape.`.
+This conversation still receives every other fleet-wide or unresolvable wake, the branch's wakes when it is unavailable, and every watcher-failure alarm regardless of posture, so the arm and repair contract above is unchanged.
+--- after:
+ls: cannot access '/tmp/fm-lab.6ZM1ZQ/state/.afk-contract': No such file or directory
+1793295157.afk-contract
+1793295292.afk-contract
+--- away record adversarial:
+Quiet mode starts nothing on this home while its away record (state/.afk-contract) is live: the captain has returned, so run the /afk return (bin/fm-afk-return.sh), pass its catch-up gate, then run quiet-check again.
+quiet-check rc=2
+fm-afk-launch: quiet mode refuses while this home's away record (state/.afk-contract) is live; run the /afk return (bin/fm-afk-return.sh) and pass its catch-up gate, then run bin/fm-afk-launch.sh quiet-check
+enter rc=3
+away
+- Away/quiet mode: inactive.
+While an away-posture record `state/.afk-contract` exists (a record whose mode is quiet is a present captain and parks nothing) the branch takes every row instead, this conversation receives no processing request, and main's standing authority relocates to the branch through the guarded scripts; a wake the branch cannot take and every watcher-failure alarm still reach this conversation, and the first run boundary after the record is archived presents what accumulated (docs/pi-supervision-branch.md "Postures").
+A captain-facing outcome instead appears as one exact, sequence-keyed visible transcript entry, and while attended then arrives in this conversation as one hidden supervision processing request listing each `[seq N, recorded <age> ago] task: summary` it covers; outcomes recorded while away wait for that request until the record is archived.
+present - away posture recorded at 2026-10-29T17:35:10Z (hold-for-return only; bin/fm-afk-contract.sh readback for the mandate); no daemon runs, the ordinary supervision session continues.
+away

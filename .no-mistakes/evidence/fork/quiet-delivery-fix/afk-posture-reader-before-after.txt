@@ -1,0 +1,9 @@
+== record=none ()
+  base 7da4c36: afkPostureRecordPresent=false
+  fix  c5b3dd7: afkPostureRecordPresent=false
+== record=quiet (quiet)
+  base 7da4c36: afkPostureRecordPresent=true
+  fix  c5b3dd7: afkPostureRecordPresent=false
+== record=away (away)
+  base 7da4c36: afkPostureRecordPresent=true
+  fix  c5b3dd7: afkPostureRecordPresent=true

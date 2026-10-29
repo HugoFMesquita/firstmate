@@ -1,0 +1,31 @@
+ and no away record are used. If that branch is broken or inside its cooldown, wakes reach this conversation until it recovers.
+ rc=0
+ Took 0.1s
+ (3) output:
+ ```
+   Quiet mode needs nothing on this home: the in-process supervision branch already handles the wakes it can while the captain is present and opens a turn here for a captain-facing outcome; no daemon
+ and no away record are used. If that branch is broken or inside its cooldown, wakes reach this conversation until it recovers.
+   rc=0
+ ```
+ Exit code: 0
+ $ FM_AFK_MODE=quiet bin/fm-afk-launch.sh enter --words "stay quiet"; echo rc=$?; ls -la $FM_HOME/state/.afk-contract (timeout 60s)
+ ... (1 earlier lines, ctrl+o to expand)
+ rc=3
+ ls: cannot access '/tmp/fm-lab.6ZM1ZQ/state/.afk-contract': No such file or directory
+ Command exited with code 2
+ Took 0.1s
+ Thinking...
+ (4) output:
+ ```
+   fm-afk-launch: quiet mode writes no record on Pi, whose in-process supervision branch already is quiet mode; run bin/fm-afk-launch.sh quiet-check
+   rc=3
+   ls: cannot access '/tmp/fm-lab.6ZM1ZQ/state/.afk-contract': No such file or directory
+ ```
+ Exit code: 2
+ All four commands run, captain. Summary of the results: (1) FM_HOME=/tmp/fm-lab.6ZM1ZQ, harness is pi, exit 0. (2) Session start archived the leftover quiet-mode record and reported away/quiet
+ inactive; the .afk-contract file does not exist but the archived 1793295157.afk-contract remains in afk-contracts/, exit 2 (ls failure). (3) quiet-check reports nothing needed, rc=0. (4) With
+ FM_AFK_MODE=quiet, enter refuses with rc=3 — quiet mode writes no record on Pi — and no .afk-contract exists, exit 2.
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+DeepSeek V4 Flash Latest[high]  ░░░░░░░░░░░░░░░░░░░░ 2% 22k/1.0M                                                                                                                        $0.00/openrouter
+~/.no-mistakes/worktrees/3f83383b2e86/01M64BEKHWCF1B1REKXEXY943B · ⎇ detached✓
