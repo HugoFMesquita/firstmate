@@ -552,20 +552,22 @@ One supervision session runs in two postures, attended and away.
 The posture is a file: the away-posture record `state/.afk-contract`.
 Only `bin/fm-afk-contract.sh` writes it, in the same turn as `/afk`.
 The return path archives it on the captain's first unmarked message.
+Only an away record is the away posture: a record whose `mode` is quiet is a present captain, as `bin/fm-afk-contract.sh mode` reports it, and every reader below treats it as attended.
+`/quiet` writes no record on Pi (`bin/fm-afk-launch.sh quiet-check` exits 0 and a quiet `enter` refuses), and session start archives a leftover quiet record.
 
 ### Who reads the record
 
 The record is never inferred from chat and never placed in the branch's byte-stable prompt prefix.
 Three readers check it:
 
-- The dispatcher reads its presence at every routing decision.
+- The dispatcher reads its presence and mode at every routing decision.
 - The branch reads it at the tail of every wake and immediately before every captain-outcome presentation.
 - The guarded scripts validate it through the record owner at every gate.
 
 On Pi the away daemon is never launched, so the watcher is the single owner of supervision in both postures.
 A leftover `state/.afk` flag declines nothing.
 
-### While the record exists
+### While an away record exists
 
 - Every actionable row is branch-eligible.
   Check rows, decision-owned signal and stale rows, and heartbeat rows are claimed by the branch on whatever wake finds them unread.

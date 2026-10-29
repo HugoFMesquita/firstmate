@@ -2293,6 +2293,106 @@ EOF
 # fm_branch_report, and drain, that unchanged situation now reaches the
 # captain exactly once, and a new event on the same task - a red check -
 # still reaches the captain path afterwards.
+# A quiet-mode record is a present captain (bin/fm-afk-contract.sh
+# fm_afk_contract_away_present), not the away posture: the wake carries no
+# POSTURE: AWAY tail, check and decision rows stay main-owned, a captain
+# outcome opens the processing turn on main, and the context handler leaves the
+# typed request alone. A true away record, even one whose words spell
+# `mode: quiet`, still parks main. Every record write goes through the real
+# bin/fm-afk-contract.sh.
+test_quiet_record_is_a_present_captain_on_the_branch() {
+  local repo home out status
+  repo="$TMP_ROOT/quiet-record-root"
+  home="$TMP_ROOT/quiet-record-home"
+  mkdir -p "$home/state" "$home/config"
+  install_pi_branch_extension_fixture "$repo"
+  PLUGIN="$repo/.pi/extensions/fm-branch-supervision.ts" FM_HOME="$home" FM_ROOT_OVERRIDE="$ROOT" \
+    DRIVER_PRELUDE="$DRIVER_PRELUDE" node --input-type=module > "$TMP_ROOT/node-output" 2>&1 <<'EOF'
+const prelude = process.env.DRIVER_PRELUDE;
+await eval(`(async () => { ${prelude}; globalThis.__t = { fire, dispatch, settle, sentToMain, outcomeScript, defaultSessionCtx, home, realRoot }; })()`);
+const { fire, dispatch, settle, sentToMain, defaultSessionCtx, home, realRoot } = globalThis.__t;
+import { spawnSync } from "node:child_process";
+import { writeFileSync } from "node:fs";
+import { dirname } from "node:path";
+import { pathToFileURL } from "node:url";
+
+const state = `${home}/state`;
+const contract = (args, extra = {}) => {
+  const result = spawnSync("bash", [`${realRoot}/bin/fm-afk-contract.sh`, ...args], {
+    encoding: "utf8",
+    env: { ...process.env, FM_HOME: home, FM_STATE_OVERRIDE: state, ...extra },
+  });
+  if (result.status !== 0) throw new Error(`fm-afk-contract.sh ${args.join(" ")} failed: ${result.stderr}`);
+  return (result.stdout || "").trim();
+};
+const requests = () => sentToMain.filter((sent) => sent.message.customType === "fm-branch-process");
+const lib = await import(pathToFileURL(`${dirname(process.env.PLUGIN)}/lib/fm-branch-dispatch.ts`).href);
+
+await fire("session_start", {}, defaultSessionCtx);
+contract(["enter"], { FM_AFK_MODE: "quiet" });
+if (contract(["mode"]) !== "quiet") throw new Error("the fixture did not record quiet mode");
+if (lib.afkPostureRecordPresent(state)) throw new Error("a quiet record read as the away posture");
+
+// Check rows and decision-owned rows stay main-owned for a present captain.
+writeFileSync(`${state}/.wake-queue`, "1\t1\tcheck\tmerge-poll\tcheck: merge-poll: PR merged\n");
+const checkOffer = lib.branchOfferForWake(state, "check: merge-poll: PR merged", lib.afkPostureRecordPresent(state));
+if (checkOffer.eligible) throw new Error("a quiet record let the branch claim a check row");
+writeFileSync(`${state}/.wake-queue`, "1\t1\tsignal\tdecision-task.status\tneeds-decision: decision-task.status\n");
+const decisionOffer = lib.branchOfferForWake(state, "signal: decision-task.status", lib.afkPostureRecordPresent(state));
+if (decisionOffer.eligible) throw new Error("a quiet record let the branch claim a decision row");
+writeFileSync(`${state}/.wake-queue`, "");
+
+// The wake carries no away tail.
+let finish;
+globalThis.__fmOnBranchPrompt = () => new Promise((resolve) => { finish = resolve; });
+const offer = dispatch("signal: quiet wake");
+if (!offer.accepted) throw new Error("the wake was refused under a quiet record");
+await settle(() => (globalThis.__fmPrompts ?? []).length === 1, "branch prompt");
+if (globalThis.__fmPrompts[0].includes("POSTURE: AWAY")) throw new Error("a quiet record put the away tail on the wake");
+const report = globalThis.__fmSessions[0].options.customTools.find((tool) => tool.name === "fm_branch_report");
+await report.execute("r1", { task: "branch-driver", verdict: "routine", summary: "worker healthy" }, undefined, undefined, {});
+finish();
+await offer.settlement;
+globalThis.__fmOnBranchPrompt = undefined;
+
+// A captain outcome opens the processing turn on the idle main.
+const result = await report.execute("c1", { task: "task-d", verdict: "captain", summary: "PR https://example.com/pr/1 is ready for review" }, undefined, undefined, {});
+if (result.isError) throw new Error(`captain report refused: ${JSON.stringify(result)}`);
+const opened = requests();
+if (opened.length < 1) throw new Error("a quiet record parked main: no processing request was sent");
+if (opened[0].options?.triggerTurn !== true || opened[0].options?.deliverAs !== "followUp") {
+  throw new Error(`the processing request did not open a main turn: ${JSON.stringify(opened[0].options)}`);
+}
+
+// The typed request survives the context handler.
+const processingMsg = { role: "custom", customType: opened[0].message.customType, content: opened[0].message.content, display: false };
+let aborted = false;
+const ctx = { ...defaultSessionCtx, abort() { aborted = true; } };
+await fire("before_agent_start", { messageType: "custom", message: processingMsg }, ctx);
+await fire("agent_start", {}, defaultSessionCtx);
+const context = await fire("context", { messages: [{ role: "user", content: "earlier" }, processingMsg] }, ctx);
+if (aborted || context !== undefined) throw new Error("the context handler stripped or aborted a processing request under a quiet record");
+await fire("agent_end", {});
+
+// An away record still parks main, including one whose words say `mode: quiet`.
+contract(["enter", "--words", "mode: quiet"]);
+if (contract(["mode"]) !== "away") throw new Error("the fixture did not record the away posture");
+if (!lib.afkPostureRecordPresent(state)) throw new Error("an away record did not read as the away posture");
+writeFileSync(`${state}/.wake-queue`, "1\t1\tcheck\tmerge-poll\tcheck: merge-poll: PR merged\n");
+if (!lib.branchOfferForWake(state, "check: merge-poll: PR merged", true).eligible) throw new Error("an away record stopped claiming check rows");
+writeFileSync(`${state}/.wake-queue`, "");
+const before = requests().length;
+await report.execute("c2", { task: "task-e", verdict: "captain", summary: "PR https://example.com/pr/2 is ready for review" }, undefined, undefined, {});
+await fire("agent_settled", {});
+if (requests().length !== before) throw new Error("an away record let a processing request open on main");
+process.exit(0);
+EOF
+  status=$?
+  out=$(cat "$TMP_ROOT/node-output")
+  expect_code 0 "$status" "a quiet record must read as a present captain on Pi: $out"
+  pass "Pi branch: a quiet record is a present captain (no away tail, main-owned check and decision rows, processing turn opens, context kept), while an away record still parks main"
+}
+
 test_away_unchanged_held_outcome_reaches_the_captain_once_until_a_new_event() {
   local repo home out status old
   repo="$TMP_ROOT/away-held-once-root"
@@ -6249,6 +6349,7 @@ test_branch_dispatch_routes_secondmate_signal_by_new_span
 test_branch_cache_key_is_per_home_stable
 test_branch_default_on_heartbeat_afk_and_fallback
 test_away_record_parks_main_and_presents_after_archive
+test_quiet_record_is_a_present_captain_on_the_branch
 test_away_unchanged_held_outcome_reaches_the_captain_once_until_a_new_event
 test_away_only_wake_rejects_when_record_is_archived_before_drain
 test_away_claimed_heartbeat_on_a_task_wake_lifts_task_scoping
