@@ -1100,7 +1100,8 @@ unit_daemon_quiet_entry_holds_nothing_for_a_return() {
 # /quiet where the attended supervision host runs is a statement: quiet-check
 # says quiet mode needs nothing, or that the session is paused while its
 # broken-session latch holds, and a quiet enter writes nothing. Without the
-# opt-in, or on Pi, quiet-check says nothing and quiet mode is the daemon's.
+# opt-in, quiet-check says nothing and quiet mode is the daemon's; on Pi it is
+# a statement too, because the in-process supervision branch is always attended.
 unit_supervision_host_quiet_statement() {
   local st out rc key harness
   st=$(mktemp -d "${TMPDIR:-/tmp}/fm-afk-quiet.XXXXXX")
@@ -1114,8 +1115,25 @@ unit_supervision_host_quiet_statement() {
   out=$(quiet_in "$st" "$LAUNCH" quiet-check); rc=$?
   quiet_expect 0 'Quiet mode needs nothing on this home' "quiet-check on a claude home without config/supervision-host must say quiet mode needs nothing"
   printf 'claude\n' > "$st/config/supervision-host"
+  for harness in pi pi-signed; do
+    out=$(FM_TEST_HARNESS=$harness quiet_in "$st" "$LAUNCH" quiet-check); rc=$?
+    quiet_expect 0 'Quiet mode needs nothing on this home: the in-process supervision branch' "$harness: quiet-check must say the in-process branch is the attended posture"
+    printf '%s' "$out" | grep -F 'If that branch is broken or inside its cooldown, wakes reach this conversation' >/dev/null \
+      || fail "$harness: quiet-check must not claim the branch is healthy: $out"
+    out=$(FM_TEST_HARNESS=$harness quiet_in "$st" env FM_AFK_MODE=quiet "$LAUNCH" enter --words "stay quiet"); rc=$?
+    if [ "$rc" -ne 3 ] || [ -e "$st/state/.afk-contract" ] || [ -e "$st/state/.afk" ] \
+      || ! printf '%s' "$out" | grep -F 'quiet mode writes no record on Pi' >/dev/null; then
+      fail "$harness: a quiet enter must refuse and write no record that would park a present captain (rc=$rc): $out"
+    fi
+  done
+  # An away record on Pi comes first, as on a host home.
+  quiet_in "$st" "$CONTRACT" enter --words "away for now" >/dev/null || fail "could not record the away fixture on pi"
   out=$(FM_TEST_HARNESS=pi quiet_in "$st" "$LAUNCH" quiet-check); rc=$?
-  [ "$rc" -eq 1 ] && [ -z "$out" ] || fail "quiet-check on a pi home must exit 1 silently (rc=$rc): $out"
+  quiet_expect 2 'Quiet mode starts nothing on this home while its away record' "pi: quiet-check must refuse while an away record is live"
+  out=$(FM_TEST_HARNESS=pi quiet_in "$st" env FM_AFK_MODE=quiet "$LAUNCH" enter --words "stay quiet"); rc=$?
+  [ "$rc" -eq 3 ] && [ "$(quiet_in "$st" "$CONTRACT" mode)" = away ] \
+    || fail "pi: a quiet enter over a live away record must refuse and leave it (rc=$rc): $out"
+  quiet_in "$st" "$CONTRACT" archive >/dev/null || fail "could not archive the pi away fixture"
 
   for harness in claude cursor; do
     out=$(FM_TEST_HARNESS=$harness quiet_in "$st" "$LAUNCH" quiet-check); rc=$?

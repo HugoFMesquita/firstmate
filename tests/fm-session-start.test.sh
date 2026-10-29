@@ -2809,6 +2809,36 @@ EOF
   pass "the AFK digest reads a quiet record as a present captain holding nothing, and an away record as hold-for-return"
 }
 
+# Quiet mode writes no record on Pi, where the in-process branch is always
+# attended (bin/fm-afk-launch.sh quiet-check): session start archives a leftover
+# quiet record instead of reporting it present, leaves a true away record alone,
+# and touches a quiet record on no other harness.
+test_pi_session_start_archives_a_leftover_quiet_record() {
+  local harness rec root home fakebin out
+  for harness in pi pi-signed; do
+    rec=$(new_world "pi-quiet-record-$harness")
+    IFS='|' read -r root home fakebin <<EOF
+$rec
+EOF
+    make_fake_toolchain "$fakebin"
+    make_fake_ps_harness "$fakebin" "$harness"
+    FM_AFK_MODE=quiet FM_HOME="$home" "$ROOT/bin/fm-afk-contract.sh" enter >/dev/null 2>&1 || fail "quiet entry failed"
+
+    out=$(FM_FAKE_HARNESS=$harness run_session_start "$home" "$root" "$fakebin:$BASE_PATH" "$harness")
+    assert_contains "$out" "Archived a leftover quiet-mode record" "$harness: session start did not report archiving the quiet record"
+    assert_not_contains "$out" "present - quiet mode recorded" "$harness: the digest still called the quiet record present"
+    [ ! -e "$home/state/.afk-contract" ] || fail "$harness: the quiet record was left in place"
+    [ -n "$(find "$home/state/afk-contracts" -type f 2>/dev/null)" ] || fail "$harness: the quiet record was not archived"
+
+    FM_HOME="$home" "$ROOT/bin/fm-afk-contract.sh" enter --words 'away for the afternoon' >/dev/null 2>&1 || fail "away entry failed"
+    out=$(FM_FAKE_HARNESS=$harness run_session_start "$home" "$root" "$fakebin:$BASE_PATH" "$harness")
+    assert_not_contains "$out" "Archived a leftover quiet-mode record" "$harness: session start archived a true away record"
+    assert_contains "$out" "present - away posture recorded" "$harness: the digest lost the away record"
+    [ "$(FM_HOME="$home" "$ROOT/bin/fm-afk-contract.sh" mode)" = away ] || fail "$harness: the away record was disturbed"
+  done
+  pass "Pi session start archives a leftover quiet record with a note and leaves an away record alone"
+}
+
 test_next_step_afk_legacy_empty_flag_defaults_away() {
   local rec root home fakebin out
   rec=$(new_world next-step-afk-legacy)
@@ -3139,6 +3169,7 @@ test_quiet_record_digest_holds_nothing_for_a_return
 test_next_step_afk_legacy_empty_flag_defaults_away
 test_supervision_block_exactly_one_and_pi_diagnostic
 test_pi_signed_primary_uses_pi_extensions_without_identity_normalization
+test_pi_session_start_archives_a_leftover_quiet_record
 test_pi_diagnostic_rejects_stale_loaded_marker
 test_pi_diagnostic_rejects_handoff_generation_marker
 test_pi_diagnostic_accepts_prelock_loaded_marker

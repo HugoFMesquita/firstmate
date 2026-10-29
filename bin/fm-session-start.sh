@@ -810,6 +810,13 @@ else
   # other harness stay entirely untouched (captain-decided criterion).
   if [ "$PRIMARY_HARNESS" = pi ] || [ "$PRIMARY_HARNESS" = pi-signed ]; then
     FM_HOME="$FM_HOME" FM_STATE_OVERRIDE="$STATE" "$SCRIPT_DIR/fm-lease.sh" sweep 2>/dev/null || true
+    # A quiet-mode record has no place on Pi, where the in-process branch is
+    # always attended (bin/fm-afk-launch.sh quiet-check): archive a leftover one
+    # so it cannot be mistaken for a posture, and say so once.
+    if [ "$(FM_HOME="$FM_HOME" FM_STATE_OVERRIDE="$STATE" "$SCRIPT_DIR/fm-afk-contract.sh" mode 2>/dev/null)" = quiet ] \
+      && QUIET_ARCHIVED=$(FM_HOME="$FM_HOME" FM_STATE_OVERRIDE="$STATE" "$SCRIPT_DIR/fm-afk-contract.sh" archive 2>/dev/null); then
+      printf 'Archived a leftover quiet-mode record (%s): quiet mode writes no record on Pi, and the captain stays present.\n' "$QUIET_ARCHIVED"
+    fi
     BRANCH_REPLAY_OUT=$(FM_HOME="$FM_HOME" FM_STATE_OVERRIDE="$STATE" \
       "$SCRIPT_DIR/fm-branch-outcome.sh" startup-replay 2>&1) || BRANCH_REPLAY_OUT=
     if [ -n "$BRANCH_REPLAY_OUT" ]; then

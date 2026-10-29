@@ -21,7 +21,9 @@ import { runCommandAsync } from "./fm-async-exec.ts";
 // Postures (docs/pi-supervision-branch.md "Postures"). The away-posture record
 // state/.afk-contract (owner: bin/fm-afk-contract.sh) is the posture; it is
 // read as a file at every routing decision, never inferred from chat. While
-// it exists the branch takes EVERY actionable row - check rows, decision-owned
+// an away record exists (one whose `mode:` is not quiet, like
+// fm_afk_contract_away_present; a quiet record is a present captain) the
+// branch takes EVERY actionable row - check rows, decision-owned
 // rows, and heartbeat rows included - and main is offered nothing the branch
 // can take. The two vetoes that describe a broken queue stay vetoes in both
 // postures, and such a wake, like every watcher-failure alarm, still falls
@@ -31,13 +33,22 @@ import { runCommandAsync } from "./fm-async-exec.ts";
 export const FM_BRANCH_DISPATCH_EVENT = "fm-branch-supervision:dispatch";
 
 // The away-posture record's state-relative filename, exactly as
-// bin/fm-afk-contract.sh writes it. Presence is the only fact read here; the
-// guarded scripts validate the record themselves (bin/fm-lease-lib.sh).
+// bin/fm-afk-contract.sh writes it. Presence and the `mode:` line are the only
+// facts read here; the guarded scripts validate the record themselves
+// (bin/fm-lease-lib.sh).
 export const AFK_CONTRACT_FILE = ".afk-contract";
 
+// True while an away record (not a quiet one) parks main.
 export function afkPostureRecordPresent(state: string): boolean {
   try {
-    return statSync(join(state, AFK_CONTRACT_FILE)).isFile();
+    const path = join(state, AFK_CONTRACT_FILE);
+    if (!statSync(path).isFile()) return false;
+    // Only an away record is away (bin/fm-afk-contract.sh
+    // fm_afk_contract_away_present): a record marked `mode: quiet` is a present
+    // captain, so main keeps its turns. The first `mode:` line wins, as in
+    // fm_afk_contract_read_field.
+    const mode = /^mode: (.*)$/m.exec(readFileSync(path, "utf8"))?.[1];
+    return mode !== "quiet";
   } catch {
     return false;
   }

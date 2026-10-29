@@ -25,6 +25,13 @@
 # engine, because every away wake then reaches main. Every other harness still
 # runs the daemon for now, so `start` and `start-native` require the record
 # `enter` wrote before they launch the daemon.
+# QUIET MODE on Pi and pi-signed needs nothing either: the in-process
+# supervision branch is always attended-ready (docs/pi-supervision-branch.md
+# "Postures"), so `quiet-check` exits 0 and a quiet `enter` refuses (exit 3)
+# before writing, and bin/fm-session-start.sh archives a leftover quiet record.
+# The extension's broken-branch cooldown is not readable from bash, so
+# `quiet-check` says wakes reach main while the branch is broken, never that it
+# is healthy.
 # QUIET MODE on a home that runs the supervision host needs nothing
 # where the attended host runs (docs/supervision-host.md "Quiet mode"): its
 # primary is attended-ready (fm_supervision_host_attended_ready: engine, tools,
@@ -243,6 +250,17 @@ fm_afk_launch_host_primary() {  # <harness>
   return 1
 }
 
+# Pi and pi-signed run the attended supervision branch inside the Pi
+# extension (docs/pi-supervision-branch.md), not the host, so they stay out of
+# fm_afk_launch_host_primary's host gates yet never need quiet mode to do more
+# than state it.
+fm_afk_launch_pi_primary() {  # <harness>
+  case "$1" in
+    pi|pi-signed) return 0 ;;
+  esac
+  return 1
+}
+
 # True when the posture record is a quiet entry's (bin/fm-afk-contract.sh mode).
 fm_afk_launch_record_quiet() {
   [ "$(fm_afk_contract_mode "$FM_AFK_LAUNCH_STATE")" = quiet ]
@@ -268,6 +286,13 @@ fm_afk_launch_quiet_needs_nothing() {
   local harness config
   FM_AFK_LAUNCH_QUIET_WHY=
   harness=$(fm_afk_launch_primary_harness)
+  # Pi's attended supervision branch is the in-process extension, always on
+  # and quiet mode by construction, so it needs no host gate; an away record
+  # still comes first.
+  if fm_afk_launch_pi_primary "$harness"; then
+    fm_afk_contract_away_present "$FM_AFK_LAUNCH_STATE" && return 2
+    return 0
+  fi
   fm_afk_launch_host_primary "$harness" || return 1
   config=${FM_CONFIG_OVERRIDE:-$FM_HOME/config}
   fm_supervision_host_enabled "$config" "$harness" || return 1
@@ -293,6 +318,12 @@ fm_afk_launch_quiet_check() {
   if [ "$rc" -eq 2 ]; then
     printf 'Quiet mode starts nothing on this home while its away record (state/.afk-contract) is live: the captain has returned, so run the /afk return (bin/fm-afk-return.sh), pass its catch-up gate, then run quiet-check again.\n'
     return 2
+  fi
+  if [ "$rc" -eq 0 ] && fm_afk_launch_pi_primary "$(fm_afk_launch_primary_harness)"; then
+    # The extension's broken-branch cooldown lives in its own memory, which
+    # bash cannot read, so this statement never claims the branch is healthy.
+    printf 'Quiet mode needs nothing on this home: the in-process supervision branch already handles the wakes it can while the captain is present and opens a turn here for a captain-facing outcome; no daemon and no away record are used. If that branch is broken or inside its cooldown, wakes reach this conversation until it recovers.\n'
+    return 0
   fi
   if [ "$rc" -ne 0 ]; then
     [ -z "$FM_AFK_LAUNCH_QUIET_WHY" ] \
@@ -379,7 +410,11 @@ fm_afk_launch_enter() {
     fm_afk_launch_quiet_needs_nothing
     case $? in
       0)
-        fm_afk_launch_log "quiet mode writes no away-posture record on this home, whose attended supervision host already is quiet mode; run bin/fm-afk-launch.sh quiet-check"
+        if fm_afk_launch_pi_primary "$(fm_afk_launch_primary_harness)"; then
+          fm_afk_launch_log "quiet mode writes no record on Pi, whose in-process supervision branch already is quiet mode; run bin/fm-afk-launch.sh quiet-check"
+        else
+          fm_afk_launch_log "quiet mode writes no away-posture record on this home, whose attended supervision host already is quiet mode; run bin/fm-afk-launch.sh quiet-check"
+        fi
         return 3 ;;
       2)
         fm_afk_launch_log "quiet mode refuses while this home's away record (state/.afk-contract) is live; run the /afk return (bin/fm-afk-return.sh) and pass its catch-up gate, then run bin/fm-afk-launch.sh quiet-check"
