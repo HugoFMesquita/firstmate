@@ -1,0 +1,10 @@
+Vendored verbatim, unmodified, as a read-only skill-analyzer test fixture.
+The directory name differs from the skill's own name on purpose; the analyzer must flag it.
+
+repository: https://github.com/addyosmani/agent-skills
+path: skills/code-review-and-quality/SKILL.md
+commit: 28f435ea69a78531ec00779c7f3b78c64ce95896
+git blob: 08209ff2208d2883d48d945f7754c428b77f8d87
+sha256: 2db1e850379f255fd3091ef278cde24cd6c7d2ba23e360cc52ea522c40d4396e
+size: 398 lines, 20976 bytes
+license: MIT (repository LICENSE, reproduced in LICENSE beside this file)

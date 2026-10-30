@@ -8,7 +8,7 @@ metadata:
 
 # Agent-only reference skills
 
-These skills are not captain-invocable; load them only at their precise triggers.
+These skills are not captain-invocable, except where an entry names its captain command; load them only at their precise triggers.
 
 - `operational-home-layout` - load when locating, interpreting, or changing Firstmate home, config, data, state, project, or generated runtime paths.
 - `session-start-recovery` - load when the session-start digest reports unfinished checks, actionable diagnostics, recovery inputs, or output requiring interpretation.
@@ -32,3 +32,4 @@ These skills are not captain-invocable; load them only at their precise triggers
 - `fmx-respond` - load on an `x-mention <request_id>` `check:` wake to handle the mention, on an `x-mode-error ...` `check:` wake to report the Relay configuration blocker, on a `public-followup ...` `check:` wake or a startup-surfaced public commitment, and on any milestone or terminal wake for a Relay-linked task before posting its completion follow-up; relevant only when Relay is on.
 - `firstmate-codexapp` - load before coordinating a visible Codex Desktop thread, evaluating a Codex App backend request, or reconciling Codex Desktop host-tool smoke evidence for Firstmate work.
 - `firstmate-coding-guidelines` - load before changing firstmate's shared, tracked material, as defined by section 1's list, whether editing directly or briefing a crewmate for a firstmate-repo task.
+- `skill-analyzer` - load before fetching, reading, comparing, trialling, or recommending any third-party skill, when the captain asks whether an external skill is worth installing, replacing an existing skill with, or borrowing from, and before any skill from outside this repository is placed in a skill folder; the captain can also invoke it as `/skill-analyzer`.
