@@ -147,9 +147,10 @@ for needle in want.get("must_contain", []):
     if needle not in text:
         sys.exit(f"{fixture}: report lacks required text {needle!r}")
 # A harvest item is accounted for when sections 4, 7, or 9 cite a line of
-# the external SKILL.md inside its range, whatever the report calls it.
+# the external SKILL.md inside its range, whatever the report calls it; the
+# file name may be code-formatted ("`SKILL.md`:164").
 accounted = set()
-for match in re.finditer(r"SKILL\.md:(\d+)(?:-(\d+))?", section(4) + section(7) + section(9)):
+for match in re.finditer(r"SKILL\.md`?:(\d+)(?:-(\d+))?", section(4) + section(7) + section(9)):
     accounted.update(range(int(match.group(1)), int(match.group(2) or match.group(1)) + 1))
 for item, (low, high) in want.get("harvest_items", {}).items():
     if not accounted.intersection(range(low, high + 1)):
