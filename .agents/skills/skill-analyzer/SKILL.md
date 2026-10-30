@@ -38,10 +38,10 @@ These tier models are the captain's choice for this skill, so do not route aroun
 Scaffold with `bin/fm-brief.sh <id>-triage <firstmate-repo-name> --scout`, point `## Firstmate spec` at this file by absolute path and at this section, and spawn with `bin/fm-spawn.sh <id>-triage <firstmate-project-dir> --scout --model anthropic/claude-sonnet-5.5 --effort medium`.
 The triage agent:
 
-1. Resolves the source to owner, repo, ref, and path; pins the commit with `gh-axi api repos/<o>/<r>/commits/<ref>` and lists the folder with `gh-axi api repos/<o>/<r>/contents/<path>?ref=<sha>`; saves `SKILL.md` to `data/<task-id>/snapshot/<name>/SKILL.md` with `sha256sum`.
+1. Resolves the source to owner, repo, ref, and path; pins the commit with `gh-axi api repos/<o>/<r>/commits/<ref>` and lists the folder with `gh-axi api repos/<o>/<r>/contents/<path>?ref=<sha>`; saves `SKILL.md` to `data/<task-id>/snapshot/<source folder name>/SKILL.md` with `sha256sum`.
    A local folder is pinned by its file hashes and, inside a git repository, its commit.
    A failed fetch is `decline (unreachable)` with the HTTP status; never describe a skill from memory.
-2. Parses the frontmatter: name, description, license, `disable-model-invocation`, non-spec fields; a missing description is `malformed` (Pi will not load it) but reading continues.
+2. Parses the frontmatter: name, description, license, `disable-model-invocation`, non-spec fields; runs `bin/fm-skill-surface.py --root candidate=<dir holding the pinned skill folder>` on the snapshot (a local folder's parent directory, or `data/<task-id>/snapshot`) and records the candidate's flags; a `missing-description` flag is `malformed` (Pi will not load it) but reading continues.
 3. Runs `bin/fm-skill-surface.py` (with `FM_HOME` set to the supervising home) for the live surface; notes any exact name match and any `same-content-as` entry.
 4. Scans the external description for broad phrases (`any change`, `before merging`, `always`, `any task`, `whenever`, `every time`, `all code`) and lists every installed description on the same topic.
 5. Finds the topic's owner: review -> the no-mistakes review prompt (`strings "$(command -v no-mistakes)"`) and `AGENTS.md` section 7; decisions -> `ask-user-authority`; merging -> `ship-landing` and hard rule 2; memory -> `stow`; diagnosis -> `diagnostic-reasoning`; project onboarding -> `project-management`; otherwise none.
@@ -58,7 +58,7 @@ A light analysis is the same worker bounded to about thirty minutes of work.
 Up to ten skills from one repository share one worker, one clone, and one inventory; independent repositories run as parallel workers.
 The worker:
 
-1. Clones or fetches the repository into its scratch worktree at the pinned SHA; lists every file including dotfiles with sizes, types (`file`), and `sha256sum`; reads every text file; records archives, office documents, bytecode, images, and binaries as findings without opening them.
+1. Clones or fetches the repository into its scratch worktree at the pinned SHA; lists every file including dotfiles with sizes, types (`file`), and `sha256sum`; reads every text file; records archives, office documents, bytecode, images, and binaries as findings without opening them; runs `bin/fm-skill-surface.py --root candidate=<dir holding the pinned skill folder>` on the pinned copy, including a local folder analysed directly, and records the candidate's flags.
 2. Resolves every relative path, `../` escape, sibling-skill name, URL, and tool name: inside the folder, inside the repository but outside the folder (would not travel), or nowhere; URLs get `curl -sI` only.
 3. Builds the capability inventory: one row per instruction block with `file:line`, imperative strength, vocabulary introduced, tools called, audience assumed.
 4. Reads the owner's real text at cited lines, including a tool's embedded prompt, and fills the overlap map; every `already-done` row cites the owner line and every `new` row cites the exact search that returned nothing.
@@ -108,14 +108,14 @@ Write `data/<task-id>/report.md` with exactly these headings in this order; a mu
 ```
 
 1. Verdict - one line with the verdict, reason class if declined, placement, and confidence (high, medium, or low) with the one fact that would change it.
-2. What the skill is - source, pinned commit, license, size (lines, bytes, estimated tokens), every file, scripts and binaries, references and whether each resolves, tools and stack assumed, intended audience.
+2. What the skill is - source, pinned commit, license, the candidate's `bin/fm-skill-surface.py` flags quoted verbatim (for example `missing-description`, `name!=dir`) or `-`, size (lines, bytes, estimated tokens), every file, scripts and binaries, references and whether each resolves, tools and stack assumed, intended audience.
 3. What firstmate already has on this topic - owners with `path:line`, or the exact empty search.
 4. Overlap map - table of external piece (`file:line`), firstmate today (`path:line` or empty search), class (`already-done`, `clash`, `new`, `noise`).
 5. Conflicts and safety - conflict table quoting both sides, safety findings with `file:line`, trigger analysis with the exact description, broad phrases, same-topic installed descriptions, and the model-invocation default.
 6. Fit and cost - stack, human-in-loop assumptions, tool availability, context cost per load, which workers load it where.
 7. Recommendation - adopt: placement, narrowed description, trial plan; replace: the staged plan filled in; harvest: numbered pieces with the target owner file and a one-sentence rewrite each; decline: the facts that settle it.
 8. Captain's decision - lettered options with a recommended letter, or `None`.
-9. Evidence - commands and output, the pinned file list with hashes, anything not verified and why.
+9. Evidence - commands and output, including the candidate's `bin/fm-skill-surface.py` row with its flags verbatim, the pinned file list with hashes, anything not verified and why.
 
 ## Rules
 
