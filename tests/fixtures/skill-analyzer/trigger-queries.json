@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "note": "Trigger evaluation for the skill-analyzer description, after agentskills.io optimizing-descriptions: each query runs 3 times and must reach a trigger rate of at least 0.5 (should_trigger) or at most 0.5 (should_not_trigger). The near-miss negatives share keywords with the positives on purpose.",
+  "runs": 3,
+  "threshold": 0.5,
+  "should_trigger": [
+    "Is this worth installing: https://github.com/example-org/agent-skills/tree/main/skills/changelog-writer",
+    "Compare this skill to what we already have: https://raw.githubusercontent.com/example-org/skills/main/pdf-tools/SKILL.md",
+    "Can we replace stow with this one? https://github.com/example-org/memory-skills/tree/main/skills/session-sweep",
+    "Borrow the good parts of https://github.com/example-org/agent-skills/tree/main/skills/test-review and leave the rest.",
+    "Someone recommended addyosmani/agent-skills@code-review-and-quality - should our workers use it?",
+    "I downloaded a skill folder to /tmp/new-skill; tell me whether it is safe and useful to add.",
+    "Evaluate these three skills for adoption: example-org/skills@lint-fixer, example-org/skills@doc-writer, example-org/skills@git-hygiene",
+    "Is the skills.sh entry vercel-labs/agent-skills@web-design-guidelines any good for us, or do we already cover it?",
+    "Before I drop this third-party SKILL.md into ~/.agents/skills, check it over: https://github.com/example-org/x/blob/main/SKILL.md",
+    "Would this external skill clash with how no-mistakes reviews code? https://github.com/example-org/review-skill"
+  ],
+  "should_not_trigger": [
+    "Write me a new skill that generates release notes from git tags.",
+    "Review our own ship-landing skill for clarity and trim it.",
+    "Install the no-mistakes update.",
+    "What does /stow do?",
+    "Fix the typo in the bearings skill description.",
+    "List which skills firstmate loads at session start.",
+    "Review this pull request diff for bugs before we merge it.",
+    "Add a trigger line for captain-hold-lifecycle to the trigger index.",
+    "Update firstmate to the latest version.",
+    "Create a skills folder for the fm-sandbox project with a hello-world skill."
+  ]
+}

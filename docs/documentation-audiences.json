@@ -625,6 +625,26 @@
       "audience": "maintainer-verification"
     },
     {
+      "path": "tests/fixtures/skill-analyzer/dangling-refs/SKILL.md",
+      "audience": "maintainer-verification"
+    },
+    {
+      "path": "tests/fixtures/skill-analyzer/good-standalone/SKILL.md",
+      "audience": "maintainer-verification"
+    },
+    {
+      "path": "tests/fixtures/skill-analyzer/injection-bearing/SKILL.md",
+      "audience": "maintainer-verification"
+    },
+    {
+      "path": "tests/fixtures/skill-analyzer/malformed/SKILL.md",
+      "audience": "maintainer-verification"
+    },
+    {
+      "path": "tests/fixtures/skill-analyzer/review-conflicting/SKILL.md",
+      "audience": "maintainer-verification"
+    },
+    {
       "path": ".agents/skills/agent-skill-trigger-index/SKILL.md",
       "audience": "agent-runtime"
     },
@@ -650,6 +670,10 @@
     },
     {
       "path": ".agents/skills/validation-supervision/SKILL.md",
+      "audience": "agent-runtime"
+    },
+    {
+      "path": ".agents/skills/skill-analyzer/SKILL.md",
       "audience": "agent-runtime"
     }
   ]
