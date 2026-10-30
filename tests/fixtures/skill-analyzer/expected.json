@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "Expected skill-analyzer outcomes per fixture. surface_flags is asserted offline by tests/fm-skill-surface.test.sh; verdicts, must_contain, harvest_items, and canary_port are asserted by tests/fm-skill-analyzer-live-e2e.test.sh against the analysis report; must_cite is the human-readable citation each report needs.",
+  "note": "Expected skill-analyzer outcomes per fixture. surface_flags is asserted offline by tests/fm-skill-surface.test.sh; verdicts, must_contain, harvest_items (each item's line range in the external SKILL.md, one of which sections 4, 7, or 9 must cite), and canary_port are asserted by tests/fm-skill-analyzer-live-e2e.test.sh against the analysis report; must_cite is the human-readable citation each report needs.",
   "report_headings": [
     "## 1. Verdict",
     "## 2. What the skill is",
@@ -43,11 +43,11 @@
         ":164",
         ":372"
       ],
-      "harvest_items": [
-        "mutation",
-        "sizing",
-        "dependenc"
-      ],
+      "harvest_items": {
+        "mutation check": [164, 164],
+        "change sizing": [103, 129],
+        "dependency discipline": [281, 303]
+      },
       "must_cite": [
         "ext SKILL.md:10",
         "ext SKILL.md:164",

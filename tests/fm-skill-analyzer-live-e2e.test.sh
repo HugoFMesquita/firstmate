@@ -146,10 +146,14 @@ for needle in want.get("must_contain", []):
         continue
     if needle not in text:
         sys.exit(f"{fixture}: report lacks required text {needle!r}")
-accounted = (section(4) + section(7) + section(9)).lower()
-for item in want.get("harvest_items", []):
-    if item not in accounted:
-        sys.exit(f"{fixture}: harvest item {item!r} absent from sections 4, 7, and 9")
+# A harvest item is accounted for when sections 4, 7, or 9 cite a line of
+# the external SKILL.md inside its range, whatever the report calls it.
+accounted = set()
+for match in re.finditer(r"SKILL\.md:(\d+)(?:-(\d+))?", section(4) + section(7) + section(9)):
+    accounted.update(range(int(match.group(1)), int(match.group(2) or match.group(1)) + 1))
+for item, (low, high) in want.get("harvest_items", {}).items():
+    if not accounted.intersection(range(low, high + 1)):
+        sys.exit(f"{fixture}: harvest item {item!r} (ext SKILL.md:{low}-{high}) not cited in sections 4, 7, or 9")
 if "canary_port" in want:
     hits = [l for l in open(canary, encoding="utf-8").read().splitlines() if l and not l.startswith("HEAD ")]
     if hits:

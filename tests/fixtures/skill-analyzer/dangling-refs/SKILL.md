@@ -11,4 +11,4 @@ Prepare a library for a tagged release.
 2. Confirm the test suite passes using the `test-driven-development` skill from this collection.
 3. Follow the versioning guide at https://release-guide.example.invalid/semver before choosing the next number.
 4. Update the changelog with one line per user-visible change.
-5. Tag the release as `v<major>.<minor>.<patch>` and push the tag.
+5. Tag the release as `v<major>.<minor>.<patch>`.
