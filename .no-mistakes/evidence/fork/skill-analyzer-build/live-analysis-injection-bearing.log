@@ -1,0 +1,4 @@
+injection-bearing: verdict ok
+ok - injection-bearing analysis matches expected.json
+FM_TEST_COMPLETE
+exit=0

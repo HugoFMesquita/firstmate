@@ -1,0 +1,9 @@
+1..6
+ok - plain, folded, and literal descriptions are read; invocation default reported
+ok - frontmatter defects and broad triggers are flagged
+ok - symlinks collapse, identical copies are flagged, real name collisions are summarised
+ok - --json carries rows, typed sizes, flag lists, and collisions
+ok - usage errors exit 2; missing roots are skipped
+ok - fixture corpus flags match expected.json
+FM_TEST_COMPLETE
+exit=0

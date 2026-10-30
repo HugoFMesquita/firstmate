@@ -1,0 +1,27 @@
+$ bin/fm-skill-surface.py --root user=$T/userroot --root project:demo=$T/home/projects/demo/.agents/skills
+scope	name	dir	description	model_invocation	lines	bytes	flags
+user	dangling-refs	/tmp/tmp.Hku5bu7ud0/userroot/dangling-refs	Write a release checklist for a library before tagging a version. Use when preparing a release of a package.	auto	14	644	-
+user	good-standalone	/tmp/tmp.Hku5bu7ud0/userroot/good-standalone	Generate RFC 5545 iCalendar (.ics) files for meetings and reminders. Use when asked to create a calendar invite, an event file, or an .ics attachment from
+user	tidy-imports	/tmp/tmp.Hku5bu7ud0/userroot/malformed		auto	13	442	missing-description,name!=dir
+user	code-review-and-quality	/tmp/tmp.Hku5bu7ud0/userroot/review-conflicting	Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use whe
+project:demo	good-standalone	/tmp/tmp.Hku5bu7ud0/home/projects/demo/.agents/skills/good-standalone	Generate RFC 5545 iCalendar (.ics) files for meetings and reminders. Use when asked to create a calendar invite, an event
+exit=0
+
+$ ... --json | jq flags/collisions
+user dangling-refs auto 14 []
+user good-standalone auto 35 []
+user tidy-imports auto 13 ['missing-description', 'name!=dir']
+user code-review-and-quality auto 398 ['name!=dir', 'broad-trigger:any change|before merging']
+project:demo good-standalone auto 35 ['same-content-as:user']
+collisions: []
+
+$ FM_HOME=$T/home bin/fm-skill-surface.py (default roots; only firstmate + project rows shown)
+scope	name	flags
+firstmate	skill-analyzer	-
+project:demo	good-standalone	-
+project:demo	tidy-imports	missing-description,name!=dir
+
+$ bin/fm-skill-surface.py --bogus
+fm-skill-surface.py: unknown argument '--bogus'
+Try: fm-skill-surface.py --help
+exit=2

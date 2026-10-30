@@ -1,0 +1,6 @@
+$ re-run fixed check_report on the saved real review-conflicting report
+review-conflicting: verdict ok
+exit=0
+$ old regex (HEAD) on the same report
+review-conflicting: harvest item 'mutation check' (ext SKILL.md:164-164) not cited in sections 4, 7, or 9
+exit=1

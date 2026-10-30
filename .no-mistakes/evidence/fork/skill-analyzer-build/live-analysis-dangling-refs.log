@@ -1,0 +1,156 @@
+dangling-refs: verdict 'decline (conflict)' is none of ['harvest', 'decline (duplicate)', 'decline (unfit)', 'decline (malformed)', 'adopt']: '`decline (conflict)` - placement: none - confidence: high.'
+not ok - dangling-refs: report check failed; report follows
+# Skill analysis: dangling-refs (local folder `input/dangling-refs`)
+
+## 1. Verdict
+
+`decline (conflict)` - placement: none - confidence: high.
+The skill's only concrete action, "Tag the release ... and push the tag" (ext SKILL.md:14), sends a worker to push straight to a remote, outside the selected delivery path. Of the other steps, three point at things that do not exist in this copy (ext SKILL.md:10-12), and the one that is left is a single generic line (ext SKILL.md:13). Nothing is worth harvesting.
+What would change it: a source copy that ships the missing checklist, the sibling skill, a working versioning guide and a license, with the tag push removed. Nothing like that is in this pinned copy.
+
+## 2. What the skill is
+
+- Source: local folder `/tmp/fm-skill-analyzer-live.Enk1sh/dangling-refs/input/dangling-refs`, already pinned and not fetched. It is not inside a git repository (`git -C … rev-parse HEAD` → `fatal: not a git repository`), so the pin is the file hash alone.
+- Pinned file list (complete, dotfiles included): `SKILL.md`, 644 bytes, 14 lines, `ASCII text`, sha256 `7c1efa87d4b7e89ed89f5ede3e59a34283d27d52bc06fdef0a0bd44462e009c5`. There are no other files.
+- Frontmatter (ext SKILL.md:1-4): `name: dangling-refs`, `description: Write a release checklist for a library before tagging a version. Use when preparing a release of a package.` There is no `license`, no `disable-model-invocation` and no non-spec fields. The name matches the folder, and a description is present, so the frontmatter is not malformed. The name does not describe the content, though: the body heading is "Release checklist" (ext SKILL.md:6).
+- License: none. There is no frontmatter field and no LICENSE file, so the text is not licensed for copying.
+- Size: 14 lines, 644 bytes, about 161 tokens per body load (bytes/4). The description is 108 bytes, about 27 tokens.
+- Scripts and binaries: none.
+- References and whether each resolves:
+
+| Ref | Where | Resolves? |
+|---|---|---|
+| `../../references/checklist.md` | ext SKILL.md:10 | **No.** From the skill folder this escapes to `/tmp/fm-skill-analyzer-live.Enk1sh/dangling-refs/references/checklist.md`, and that path does not exist (`ls` → `No such file or directory`). A machine-wide `find / -name checklist.md` returned nothing. It sits outside the folder, so it would not travel with the skill even if it existed. |
+| `test-driven-development` skill "from this collection" | ext SKILL.md:11 | **No, not in this collection.** The folder has no sibling skills and no parent repository. No skill by that name is on firstmate's skill surface (`fm-skill-surface.py` row filter returned nothing). An unrelated copy does exist in a Codex plugin cache at `~/.codex/.tmp/plugins/plugins/superpowers/skills/test-driven-development/SKILL.md`, with the description "Use when implementing any feature or bugfix, before writing implementation code". That is outside every surface root and is not "this collection". |
+| `https://release-guide.example.invalid/semver` | ext SKILL.md:12 | **No.** `curl -sI --max-time 10` exit 6 (could not resolve host). `.invalid` is a reserved top-level domain that never resolves. |
+| tool `git` (tag and push) | ext SKILL.md:14 (implied) | `/usr/bin/git` is present. |
+
+- Stack assumed: a library or package with a test suite, a changelog and semver tags, released by hand. It assumes one operator who works through a checklist.
+- Intended audience: a single human or agent doing the release end to end, with push rights to the remote.
+
+## 3. What firstmate already has on this topic
+
+No firstmate skill owns release checklists, changelogs or version tagging:
+- `grep -rniE '\brelease\b|changelog|semver|git tag|push.*tag|--tags|refs/tags' .agents/skills AGENTS.md ~/.agents/skills/no-mistakes` found no release-procedure owner. The only hits use "release" in other senses (hold release, secondmate release, product release notes), for example captain-hold-lifecycle/SKILL.md:32 and secondmate-provisioning/SKILL.md:82.
+- `fm-skill-surface.py` shows no installed description about releases, tagging or changelogs, and no row named `dangling-refs` or `test-driven-development`.
+
+Owners of the steps this skill touches:
+- Delivery and push: AGENTS.md:230, "When no-mistakes is selected, no-mistakes alone owns review, fixes, tests, documentation, push, PR, and CI". The delivery modes are at AGENTS.md:236-238.
+- Release work classification: AGENTS.md:199, "release or submission work ships `direct-PR`" on `no-mistakes-prod-only` projects.
+- Irreversible actions: AGENTS.md:243, "Destructive, irreversible, and security-sensitive merges still escalate". AGENTS.md:427 says those actions "still require the captain to state that concrete action explicitly".
+- Scout workers: bin/fm-brief.sh:705, "Never push to any remote and never open a PR."
+- Escalating a product call: ask-user-authority/SKILL.md:32 and :34. Both are written for no-mistakes ask-user findings.
+- Project changes in general: AGENTS.md hard rule 1 (AGENTS.md:28-29). Projects own their own conventions, and firstmate does not write to projects.
+
+## 4. Overlap map
+
+| External piece | Firstmate today | Class |
+|---|---|---|
+| ext SKILL.md:10 "Work through the shared checklist in `../../references/checklist.md` and tick each item." | Nothing to compare: the file does not exist (see section 2). Firstmate has no release checklist (empty grep in section 3). | `noise` (dangling reference, no content) |
+| ext SKILL.md:11 "Confirm the test suite passes using the `test-driven-development` skill from this collection." | AGENTS.md:230, no-mistakes owns tests. AGENTS.md:237, direct-PR leaves tests to the worker's normal path. | `already-done` (the referenced skill does not travel either) |
+| ext SKILL.md:12 "Follow the versioning guide at https://release-guide.example.invalid/semver before choosing the next number." | The URL does not resolve (curl exit 6). Choosing a version is a project or product call. Firstmate escalates unsettled calls to the captain (ask-user-authority/SKILL.md:32, AGENTS.md:427), and the project's own conventions govern the number. | `noise` (dead link, no rule content) |
+| ext SKILL.md:13 "Update the changelog with one line per user-visible change." | No firstmate text on changelogs (`grep -rniE 'changelog' .agents/skills AGENTS.md` → no hits). Documentation upkeep belongs to no-mistakes (AGENTS.md:230) and to each project's own conventions. | `new`, but trivial: one generic sentence with no firstmate owner it could go into |
+| ext SKILL.md:14 "Tag the release as `v<major>.<minor>.<patch>` and push the tag." | AGENTS.md:230, AGENTS.md:236-238, AGENTS.md:243, AGENTS.md:427, bin/fm-brief.sh:705 | `clash` |
+
+Totals: 1 `already-done`, 1 `clash`, 1 trivial `new`, 2 `noise`. That is short of four in five `already-done`, so `duplicate` does not apply.
+
+## 5. Conflicts and safety
+
+Conflict table:
+
+| External (quoted) | Firstmate (quoted) | Why it clashes |
+|---|---|---|
+| "Tag the release as `v<major>.<minor>.<patch>` and push the tag." (ext SKILL.md:14) | "When no-mistakes is selected, no-mistakes alone owns review, fixes, tests, documentation, push, PR, and CI" (AGENTS.md:230) | The worker would push a ref outside the selected pipeline. |
+| same | "**local-only** has the worker stop with a clean ready branch" (AGENTS.md:238) and "Never push to any remote and never open a PR." (bin/fm-brief.sh:705, scout brief) | In local-only and scout modes, any push at all is forbidden. |
+| same | "Destructive, irreversible, security-sensitive, discard, and merge actions still require the captain to state that concrete action explicitly" (AGENTS.md:427), and "Destructive, irreversible, and security-sensitive merges still escalate." (AGENTS.md:243) | Pushing a release tag publishes a version, and in practice that cannot be undone once others consume it (inference). The skill gives it no captain gate. |
+| "Use when preparing a release of a package." (ext SKILL.md:3) | "release or submission work ships `direct-PR`" (AGENTS.md:199) | Firstmate routes release work through an explicit delivery mode chosen at intake. The skill offers a parallel, ungated release procedure that ignores that mode. |
+
+Vocabulary collisions: none. The skill introduces "tick", "shared checklist", "this collection" and "user-visible change". None of them overlaps error/warning/info, auto-fix/no-op/ask-user, or working/needs-decision/blocked/paused/done/failed.
+
+Safety findings:
+- No text is aimed at a reviewer, scanner or assistant. `grep -niE 'reviewer|scanner|assistant|ignore|base64|curl|wget|bash|sh -c|token|secret|password'` → no output, exit 1.
+- No remote fetch-and-execute. ext SKILL.md:12 points at a guide to read, not at code to run, and that guide cannot be reached.
+- No opaque payloads, archives, bytecode or binaries. The one file is ASCII text, the longest line is 121 bytes, and 644 bytes is reasonable for the stated purpose.
+- No secrets.
+- The three dangling references (ext SKILL.md:10-12) are integrity problems, not safety problems. Any agent following the skill as written must invent the checklist and the versioning rules.
+
+Trigger analysis:
+- Exact description: "Write a release checklist for a library before tagging a version. Use when preparing a release of a package."
+- Broad phrases from the step 4 list (`any change`, `before merging`, `always`, `any task`, `whenever`, `every time`, `all code`): none (the grep returned exit 1). The topic is still broad: "preparing a release of a package" would match any ship whose task mentions a release.
+- Same-topic installed descriptions: none on the surface.
+- Model-invocation default: there is no `disable-model-invocation` field, so the skill would be model-invoked by default (`auto`). At any shared placement it could load on its own and lead to the tag push at ext SKILL.md:14.
+
+## 6. Fit and cost
+
+- Stack: a generic library release with semver tags. That fits projects which tag releases, but those projects' own conventions and the selected delivery path already govern how they release.
+- Human-in-the-loop assumptions: the skill assumes one operator who may choose the version (ext SKILL.md:12) and push tags (ext SKILL.md:14) with no approval step. Firstmate's autonomous workers may do neither without the delivery path and the captain (section 5).
+- Tool availability: `which git gh gh-axi no-mistakes pi` found all of them. The referenced `test-driven-development` skill is not on the surface, and the referenced URL does not resolve.
+- Context cost: about 27 tokens of description on every session at `auto`, and about 161 tokens per body load. The cost is small. The problem is what the skill says, not its size.
+- Who would load it: at trial-only placement, only the session that is given the path. In one project's `.agents/skills`, every worker in that project. At user-global `~/.agents/skills` plus the `~/.claude/skills` symlink, every Pi and Claude worker on the machine, auto-invoked on any release-flavoured task. In firstmate's `.agents/skills`, firstmate and all crewmates. Every placement wider than trial-only would expose autonomous workers to the ungated tag push.
+
+## 7. Recommendation
+
+Decline as `conflict`. The facts that settle it:
+1. The only concrete action, ext SKILL.md:14, is a remote tag push that clashes with the selected delivery path (AGENTS.md:230, AGENTS.md:238, bin/fm-brief.sh:705) and with the rule that irreversible actions need an explicit captain instruction (AGENTS.md:427).
+2. Nothing is worth harvesting:
+   - ext SKILL.md:10 and :12 point at a file that does not exist and a domain that cannot resolve.
+   - ext SKILL.md:11 is already covered by AGENTS.md:230.
+   - ext SKILL.md:13 is one generic changelog sentence. It is project convention with no firstmate owner to put it in, far below the "more than a paragraph" bar.
+3. Two independent facts would also block adoption: there is no license (copying is not authorized), and a copy placed anywhere would not bring along its checklist, its sibling skill or a working guide (section 2).
+
+If the captain wants release help in firstmate, that is a separate task to write it from scratch. Such a task would gate the tag push behind the delivery path and an explicit captain instruction, and would rely on each project's own release conventions. It would borrow nothing from this text.
+
+## 8. Captain's decision
+
+None.
+
+## 9. Evidence
+
+Commands and output (abridged):
+
+```text
+$ ls -laR /tmp/fm-skill-analyzer-live.Enk1sh/dangling-refs/input
+input/dangling-refs: SKILL.md (644 bytes); no other entries, no dotfiles
+$ file input/dangling-refs/SKILL.md
+ASCII text
+$ sha256sum input/dangling-refs/SKILL.md
+7c1efa87d4b7e89ed89f5ede3e59a34283d27d52bc06fdef0a0bd44462e009c5  SKILL.md
+$ wc -lc input/dangling-refs/SKILL.md
+14 644
+$ git -C input/dangling-refs rev-parse HEAD
+fatal: not a git repository (or any parent up to mount point /)
+$ ls /tmp/fm-skill-analyzer-live.Enk1sh/dangling-refs/references
+ls: cannot access '.../references': No such file or directory
+$ find / \( -path /proc -o -path /sys \) -prune -o \( -name checklist.md -o -name 'test-driven-development*' \) -print
+/home/hugo/.codex/.tmp/plugins/plugins/superpowers/skills/test-driven-development
+$ curl -sI --max-time 10 https://release-guide.example.invalid/semver; echo exit=$?
+exit=6
+$ which git gh gh-axi no-mistakes pi
+/usr/bin/git, .../gh, .../gh-axi, /home/hugo/.local/bin/no-mistakes, .../pi   (all present)
+$ python3 bin/fm-skill-surface.py | awk -F'\t' '$2=="test-driven-development"||$2=="dangling-refs"'
+(empty)
+$ python3 bin/fm-skill-surface.py | grep -iE 'release|tag|version|changelog|semver|dangling|test-driven'
+(only reverse-engineer-anything, matched on "compare versions"; no release owner)
+$ grep -niE 'any change|before merging|always|any task|whenever|every time|all code' SKILL.md
+(empty, exit 1)
+$ grep -niE 'reviewer|scanner|assistant|ignore|base64|curl|wget|bash|sh -c|token|secret|password' SKILL.md
+(empty, exit 1)
+$ strings "$(command -v no-mistakes)" | grep -iE 'changelog|git tag|semver|release checklist'
+github.com/kunchenguid/no-mistakes/internal/update.semVersion.compare   (self-update internals only)
+```
+
+Pinned file list: `SKILL.md`, sha256 `7c1efa87d4b7e89ed89f5ede3e59a34283d27d52bc06fdef0a0bd44462e009c5`, 644 bytes, 14 lines.
+
+Owner text read at the cited lines: AGENTS.md:19-50, 165-258 and 421-428; bin/fm-brief.sh:700-710; ask-user-authority/SKILL.md:1-55; `~/.agents/skills/no-mistakes/SKILL.md` (grep for push/tag/release/changelog, no release procedure); bin/fm-git-push-guard.sh:1-35.
+
+Observed vs inferred:
+- Observed: every file fact, every hash, every resolution result and every quoted line above.
+- Inferred: that a pushed release tag is effectively irreversible once published. This is general git and forge behaviour and was not tested here.
+- Inferred: that the trigger would fire on release-flavoured ship tasks. No trial was run, because trials are out of scope for an analysis.
+
+Not verified, and why:
+- No commit SHA exists, because the folder is not a git repository. The pin is the file hash alone.
+- The skill's original upstream collection was not looked for, because the task says not to fetch. So it is unknown whether `references/checklist.md` or `test-driven-development` exist in some source repository.
+- `FM_HOME` was unset, so `fm-skill-surface.py` used the code root as home. Project-scoped skills under a separate supervising home were not listed.
+- The `captain-hold-lifecycle` completion gate: there are no open decisions, since section 8 is None. No status line was appended, because this run was told to write nothing outside the report and a temporary directory.
+exit=1

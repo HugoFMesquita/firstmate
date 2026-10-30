@@ -1,0 +1,3 @@
+good-standalone: verdict ok
+ok - good-standalone analysis matches expected.json
+FM_TEST_COMPLETE

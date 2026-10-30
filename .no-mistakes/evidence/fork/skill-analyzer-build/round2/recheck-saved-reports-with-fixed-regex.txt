@@ -1,0 +1,5 @@
+good-standalone: verdict ok
+review-conflicting: verdict ok
+malformed: verdict ok
+dangling-refs: verdict ok
+injection-bearing: verdict ok

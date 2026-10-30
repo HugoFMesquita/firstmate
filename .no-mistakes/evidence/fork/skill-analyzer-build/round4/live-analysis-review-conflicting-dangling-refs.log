@@ -1,0 +1,207 @@
+review-conflicting: harvest item 'mutation check' (ext SKILL.md:164-164) not cited in sections 4, 7, or 9
+not ok - review-conflicting: report check failed; report follows
+# Skill analysis: code-review-and-quality (local folder `input/review-conflicting`, vendored from addyosmani/agent-skills@28f435e `skills/code-review-and-quality`)
+
+## 1. Verdict
+
+`decline (conflict)` - placement: none - confidence: high.
+The fact that would change it: a registered project whose stack has npm or other lockfile-pinned dependencies would turn the one materially new block (dependency-upgrade discipline, ext SKILL.md:291-302) into a `harvest` candidate for that project's no-mistakes review instructions. Every clash listed below would still have to stay out.
+
+Why: the skill's trigger and body set up a second, always-on review and approval gate before every merge (ext SKILL.md:3, :10, :16, :347-349). That gate clashes with firstmate's selected-delivery-path rule, which says no-mistakes alone owns review (AGENTS.md:229-233). It also clashes with the merge-authority rule (AGENTS.md:33-34, :241-244), and with the no-mistakes review prompt's own severity labels, action labels, and scope limits.
+9 of 26 rows are `already-done`, so this is not a `duplicate`. The 2 rows classed `new` are either noise for this machine's stacks or a soft signal the no-mistakes review prompt deliberately refuses to block on. Nothing left is worth harvesting.
+
+## 2. What the skill is
+
+- **Source:** local folder `/tmp/fm-skill-analyzer-live.oTVokB/review-conflicting/input/review-conflicting`, a pinned local copy that is not inside a git repository (`git -C <dir> rev-parse HEAD` -> `fatal: not a git repository`). It is pinned by file hashes (section 9).
+  The folder's `SOURCE` file says it came from `https://github.com/addyosmani/agent-skills` path `skills/code-review-and-quality/SKILL.md` at commit `28f435ea69a78531ec00779c7f3b78c64ce95896`, git blob `08209ff2208d2883d48d945f7754c428b77f8d87`.
+  I checked the blob locally: `git hash-object SKILL.md` -> `08209ff2208d2883d48d945f7754c428b77f8d87` (matches). I could not check the commit SHA without fetching, which this analysis forbids.
+- **Name / directory:** frontmatter `name: code-review-and-quality` (ext SKILL.md:2), but the folder is `review-conflicting`. `bin/fm-skill-surface.py` flags it `name!=dir`.
+  Pi does not require the two to match (pi docs/skills.md:83, "Pi neither requires nor warns when the declared name differs from the parent directory"), so it is a portability defect, not `malformed`.
+  The name is a valid identifier (lowercase and hyphens, 23 chars).
+- **Frontmatter:** only `name` and `description` (ext SKILL.md:1-4). There is no `license` field and no `disable-model-invocation`, so it would default to model-invoked (`auto`). The description is 326 bytes (under the 1024 limit).
+- **License:** MIT according to `SOURCE` line 9. The bundled `LICENSE` is the MIT text, "Copyright (c) 2025 Addy Osmani" (ext LICENSE:1-3). I did not check that it matches upstream (no fetch allowed).
+- **Size:** SKILL.md has 398 lines, 20,976 bytes, and 3,334 words, about 5.2k tokens per load (bytes/4). The longest line is 433 chars; the average is about 53 bytes per line, which is normal for prose.
+- **Files:** `SKILL.md` (UTF-8 text), `LICENSE` (ASCII), `SOURCE` (ASCII, fixture provenance, not part of the upstream skill). There are no scripts, binaries, archives, images, or dotfiles.
+- **References:**
+  - `security-and-hardening` (ext SKILL.md:66, :302), `performance-optimization` (:79), and `constraint-driven-development` (:164) are sibling skills. None are in the folder or installed anywhere on this machine (surface search empty, section 9).
+  - `../../references/security-checklist.md` and `../../references/performance-checklist.md` (:353-354) point outside the folder, to the upstream repo root. They would not travel with the skill, they are missing here (`ls` -> No such file), and no file with those names exists on this filesystem (`find / -xdev` empty).
+  - There are no URLs (`grep -nE 'https?://'` exit 1).
+- **Tools and stack assumed:** a JavaScript/npm stack (`npm audit` :289, :302; `package.json` and lockfile :299-300), a test suite the reviewer runs itself (:164), and a PR-based team workflow with human authors, reviewers, and "business day" response times (:251-258).
+- **Intended audience:** an interactive coding agent acting as the PR reviewer and approver, with a human making "the final call" (:221).
+
+## 3. What firstmate already has on this topic
+
+- **Delivery-path owner (review):** AGENTS.md:229-233. "The selected delivery path owns its own rigor. When no-mistakes is selected, no-mistakes alone owns review, fixes, tests, documentation, push, PR, and CI; otherwise follow the faster path without adding an independent reviewer. Never hold work outside no-mistakes for a manual clean verdict, stack serial manual reviews, ...".
+- **Merge authority:** hard rule 2, AGENTS.md:33-34; `yolo` and the green-merge rules, AGENTS.md:241-246; `ship-landing` .agents/skills/ship-landing/SKILL.md:19-20.
+- **The tool's own review prompt** (no-mistakes v1.84.0, embedded). From `strings -n 40 $(readlink -f $(command -v no-mistakes))`:
+  - output line 3149: "Review the code changes and return structured findings with a risk assessment."
+  - output lines 3150-3193: the review rules, the severity scale (3170), the action scale (3176-3178), the simplification pass (3184-3188), and the risk levels (3189-3195).
+- **Ask-user decisions:** .agents/skills/ask-user-authority/SKILL.md:13-35 and .agents/skills/validation-supervision/SKILL.md:24-27.
+- **Test quality:** ~/.agents/skills/no-mistakes/SKILL.md:66-91 (a vendored, tool-owned skill) and .agents/skills/firstmate-coding-guidelines/SKILL.md:115-117, :130.
+- **Scope discipline:** AGENTS.md:392 (section 11: extra hardening is "follow-up work to note, not scope to add") and AGENTS.md:180.
+- **Installed skills on the same topic:**
+  - user-agents and user-claude `no-mistakes` (model-invoked, 394 lines; the user-claude copy is flagged same-content-as user-agents)
+  - user-codex `review-agent` (model-invoked, 57 lines, ~/.codex/skills/.system/review-agent/SKILL.md:1-57, with its own `P0`-`P3` labels at :48-53)
+- **No exact name match:** the `fm-skill-surface.py | grep -i code-review-and-quality` search was empty (exit 1).
+
+## 4. Overlap map
+
+"nm:N" means line N of `strings -n 40` output on the no-mistakes v1.84.0 binary (the embedded review prompt).
+
+| # | External piece | Firstmate today | Class |
+|---|---|---|---|
+| 1 | Trigger "Use before merging any change" and "Every change gets reviewed before merge - no exceptions" (ext SKILL.md:3, :10, :16) | AGENTS.md:229-232 (no-mistakes alone owns review; no independent reviewer on other paths; a separate review only on captain request) | clash |
+| 2 | Approval standard and checklist verdict "Approve - Ready to merge / Request changes" (ext :12, :347-349) | AGENTS.md:33-34, :241-244; ship-landing SKILL.md:20 (merge needs the captain's word or `yolo`) | clash |
+| 3 | Correctness axis (ext :26-34) | nm:3151-3160, :3165-3166 | already-done |
+| 4 | Readability and simplicity: fewer lines, dead artifacts, bolted-on conditionals (ext :36-49) | nm:3163-3164, :3184-3188 (simplification pass over introduced components) | already-done |
+| 5 | Architecture checks and "Structural Remedies" pushing a named restructuring (ext :51-62, :88-101) | nm:3159 "Do not infer a systemic flaw from code shape, duplication, or architectural preference alone. Do not demand a shared abstraction or broad redesign without a concrete reachable path"; ask-user-authority SKILL.md:31 | clash |
+| 6 | Security axis (ext :64-75) | nm:3165, plus the authorization and privacy tracing rules nm:3155-3158 | already-done |
+| 7 | Performance axis with an `npm`/UI checklist (ext :77-86) | nm:3165 "performance regressions" | already-done |
+| 8 | Change sizing: ~100/300/1000 lines, split it, stack PRs (ext :103-126) | AGENTS.md:392 (scope is the captain's ask); nm:3184-3186 (components beyond intent become `warning`/`ask-user`) | noise |
+| 9 | File-size signal of about 1000 total lines per file; "Decompose, then add" (ext :113) | empty search (section 9, "file size" over the review prompt and owners); nm:3159 rules out blocking on shape alone | new |
+| 10 | Separate refactoring from feature work (ext :128) | nm:3184-3186; AGENTS.md:392 | already-done |
+| 11 | Change descriptions: first-line imperative, anti-patterns (ext :130-138) | owned by the tool's PR step (nm:2244 title drafting); not a review concern | noise |
+| 12 | Understand context and intent first (ext :142-150) | nm:3152-3153; ~/.agents/skills/no-mistakes/SKILL.md:130-137 (`--intent`) | already-done |
+| 13 | "Would the tests catch a regression" (ext :152-162) | ~/.agents/skills/no-mistakes/SKILL.md:90-91 "the test should fail before the fix and pass after it"; firstmate-coding-guidelines SKILL.md:130 | already-done |
+| 14 | "Answer ... by experiment": mutate code, "run the suite, then restore the file" during review (ext :164) | nm:3162 "Do NOT run tests during review. The pipeline has a dedicated test step after review."; firstmate-coding-guidelines SKILL.md:115-117 | clash |
+| 15 | Severity labels: no prefix = Required, `Critical:`, `Nit:`, `Optional:`/`Consider:`, `FYI` (ext :179-191, :230) | nm:3170 `error`/`warning`/`info`; nm:3176-3178 `ask-user`/`auto-fix`/`no-op`; nm:3173 "Do NOT report styling, formatting, ..." | clash |
+| 16 | Lead with what matters; few high-conviction comments (ext :193) | nm:3171-3172; review-agent SKILL.md:41 | already-done |
+| 17 | Verify the verification: tests run, build, manual check, screenshots (ext :195-205) | the pipeline test and CI steps; validation-supervision SKILL.md:29-32 | noise |
+| 18 | Multi-model review loop ending "Human makes the final call" (ext :207-231) | AGENTS.md:230-232 (no stacked manual reviews), :39-41 (crewmates never address the captain) | clash |
+| 19 | Dead code: "Ask before deleting: 'Should I remove these ...?'" (ext :233-249) | ask-user-authority SKILL.md:18-19 (the worker routes decisions to firstmate); nm:3176 `ask-user`; AGENTS.md:39-41 | clash |
+| 20 | Review speed: one business day (ext :251-258) | autonomous pipeline; no equivalent needed | noise |
+| 21 | "Don't accept 'I'll clean it up later' ... Require cleanup before submission ... require filing a bug" (ext :269, :362) | AGENTS.md:392; nm:3161 "Do not expand user scope or turn optional broader improvements into blockers"; ask-user-authority SKILL.md:31 | clash |
+| 22 | Honesty in review: no rubber stamp, quantify, push back (ext :271-278) | nm:3166, :3174; AGENTS.md:42-43 (hard rule 5); AGENTS.md:345-346 (evidence-first objections) | already-done |
+| 23 | Adding dependencies: stdlib first, size, maintenance, `npm audit`, license (ext :281-291) | firstmate-coding-guidelines SKILL.md:128 (flag new dependency footprint); nm:3165 security | noise (npm-specific; no npm project here, section 6) |
+| 24 | Dependency upgrades: changelog, one dependency per change, lockfile diff, never hand-edit lockfile (ext :293-302) | empty search: `grep -n -iE 'lockfile\|changelog\|one dependency'` over AGENTS.md, every firstmate skill, and the no-mistakes skill -> exit 1 | new |
+| 25 | Red flags, including "PRs merged without any review" (ext :370-385) | AGENTS.md:230 (direct-PR adds no independent reviewer by design) | clash |
+| 26 | "Presumptive blockers" for relocated complexity, file size, shared-module logic (ext :398) | nm:3159-3161 | clash |
+
+Tally (26 rows):
+
+| Class | Count | Rows |
+|---|---|---|
+| already-done | 9 | 3, 4, 6, 7, 10, 12, 13, 16, 22 |
+| clash | 10 | 1, 2, 5, 14, 15, 18, 19, 21, 25, 26 |
+| new | 2 | 9, 24 |
+| noise | 5 | 8, 11, 17, 20, 23 |
+
+9 of 26 is below the four-in-five (21 of 26) bar, so this is not a `duplicate`.
+
+## 5. Conflicts and safety
+
+### Conflict table
+
+| Topic | External text | Firstmate text |
+|---|---|---|
+| Who reviews | "Every change gets reviewed before merge — no exceptions." (ext :10); "Use before merging any change." (ext :3) | "When no-mistakes is selected, no-mistakes alone owns review, fixes, tests, documentation, push, PR, and CI; otherwise follow the faster path without adding an independent reviewer." (AGENTS.md:230) |
+| Manual gates | "Model B reviews for correctness and architecture ... Human makes the final call" (ext :215, :221) | "Never hold work outside no-mistakes for a manual clean verdict, stack serial manual reviews, or infer authority for one from security, architecture, or risk alone." (AGENTS.md:231) |
+| Merge authority | "Approve a change when it definitely improves overall code health" (ext :12); "[ ] **Approve** — Ready to merge" (ext :348) | "Never merge a PR without the captain's explicit word." (AGENTS.md:33); "`yolo` governs merge authority only: with it off, the captain approves every PR merge" (AGENTS.md:241) |
+| Tests in review | "Invert one condition the change adds ..., run the suite, then restore the file from a copy." (ext :164) | "Do NOT run tests during review. The pipeline has a dedicated test step after review." (nm:3162) |
+| Structural demands | "When you flag a structural problem, propose the move" (ext :90); "Presumptive blockers: ... a refactor that relocates complexity ...; a near-duplicate of an existing canonical helper" (ext :398) | "Do not infer a systemic flaw from code shape, duplication, or architectural preference alone. Do not demand a shared abstraction or broad redesign without a concrete reachable path, violated invariant, or immediately competing semantic owner." (nm:3159) |
+| Scope creep | "Require cleanup before submission unless it's a genuine emergency. If surrounding issues can't be addressed in this change, require filing a bug with self-assignment." (ext :269) | "Do not expand user scope or turn optional broader improvements into blockers." (nm:3161); "a generalization, consistency sweep, or extra hardening the captain did not ask for is follow-up work to note, not scope to add" (AGENTS.md:392) |
+| Who is asked | "**Ask before deleting:** 'Should I remove these now-unused elements: [list]?'" (ext :239) | "The implementation worker never decides or answers its own ask-user finding. It stops at the finding, routes the decision to firstmate" (ask-user-authority SKILL.md:18-19); "Crewmates never address the captain." (AGENTS.md:39) |
+| Style findings | "**Nit:** ... Author may ignore — formatting, style preferences" (ext :187) | "Do NOT report styling, formatting, linting, compilation, or type-checking issues." (nm:3173) |
+| Unreviewed PRs | Red flag: "PRs merged without any review" (ext :372) | direct-PR "push and open a PR without the no-mistakes pipeline" with no added reviewer, by design (AGENTS.md:230, :237) |
+
+### Vocabulary collisions
+
+- **Severity:** the skill uses no prefix (Required), `Critical:`, `Nit:`, `Optional:`, `Consider:`, and `FYI` (ext :183-189), plus "Critical, Required, Optional, or Nit" (ext :230). The no-mistakes review prompt uses `error`, `warning`, and `info` (nm:3170).
+  "Critical: Blocks merge" overlaps `error` but has a different action meaning. "Required: Must address before merge" has no equivalent: no-mistakes `warning` is explicitly "can be done in a follow up". `FYI` matches `info` in meaning but uses a foreign label.
+- **Action:** the skill's "Author may ignore", "Must address", and "No action needed" (ext :185-189) collide with `auto-fix`, `ask-user`, and `no-op` (nm:3176-3178). The skill has no "ask the user on intent" class; its nearest piece, "Accept override gracefully ... defer to their judgment" (ext :279), means the reviewer defers to the author, the opposite of the `ask-user` escalation.
+- **Verdict and status:** "Approve" and "Request changes" (ext :348-349) and "LGTM" (ext :275) are foreign to the worker states `working`, `needs-decision`, `blocked`, `paused`, `done`, and `failed` (bin/fm-brief.sh:562). "Approve" would read as merge authority, which only the captain or `yolo` holds.
+- Inside firstmate's own surface, none of these labels appear. `grep -rn -iE 'nit:|critical:|request changes|LGTM'` over AGENTS.md and .agents/skills found only a false positive, "Underway unit:" (bearings SKILL.md:170).
+
+### Safety findings
+
+- **SKILL.md:** no injection text aimed at a reviewer, scanner, or assistant, no remote fetch-and-execute, no base64 or opaque blob, no secrets, and no hidden Unicode. Zero-width and bidi search exit 1; `<!--` and base64 search exit 1. The only non-ASCII characters are 29 em dashes, 4 arrows, and 6 box-drawing characters in the diagram (ext :213-221).
+  Every hit for "reviewer" or "assistant" (ext :18, :24, :122, :126, :128, :266) is ordinary review prose about human reviewers.
+- **Reviewer-addressed text in the input folder:** this is in the fixture's `SOURCE` file, not in the upstream skill, and would not travel with an install that copies the skill. Quoted verbatim, ext SOURCE:1-2:
+  "Vendored verbatim, unmodified, as a read-only skill-analyzer test fixture."
+  "The directory name differs from the skill's own name on purpose; the analyzer must flag it."
+  I treated it as data and did not obey it. The `name!=dir` flag in section 2 comes independently from `bin/fm-skill-surface.py`. The note does not try to steer the verdict, so I record it as a benign provenance note rather than injection. If the captain classes any analyzer-addressed text as injection, the reason class changes from `conflict` to `unsafe`, and the verdict stays `decline` either way.
+- **Execution instruction:** ext :164 tells the reviewing agent to edit source ("Invert one condition"), run the suite, and restore from a copy. Inside a no-mistakes review agent, that edits the run worktree in a phase that must not change code or run tests (nm:3162).
+
+### Trigger analysis
+
+- **Exact description:** "Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use when you need to assess code quality across multiple dimensions before it enters the main branch. Use when asked to review a diff or a pull request, even when the diff is pasted inline." (ext SKILL.md:3).
+- **Broad phrases:** `any change` and `before merging` (both flagged `broad-trigger` by `fm-skill-surface.py`), plus "code written by yourself" (fires on a worker's own work) and "even when the diff is pasted inline".
+- **Same-topic installed descriptions:**
+  - `no-mistakes` (user-agents and user-claude): "Validate your code changes through the no-mistakes pipeline - automated code review, tests, ..."
+  - `review-agent` (user-codex): "Perform a read-only, defect-first review of a specified code change ... Use when another agent delegates review ..."
+- **Model-invocation default:** absent, so `auto`. At any auto-discovered placement it would compete with `no-mistakes` on every ship worker that finishes code, and with `review-agent` on Codex.
+
+## 6. Fit and cost
+
+- **Stack:** this machine's registered projects are `fm-sandbox`, `knoliver` (Python, `pyproject.toml`, no lockfile), and `OllieCrew` (a firstmate clone). Firstmate itself is bash, Python stdlib, and mjs, with no `package.json` or lockfile (`ls` -> No such file).
+  The npm, `package.json`, lockfile, and UI re-render content (ext :84, :289-302) is noise for every current stack.
+- **Human-in-the-loop assumptions:** a human author to ask (ext :239, :279), a human final call (ext :221), business-day review response (ext :255), and manual verification with screenshots (ext :202-203). Firstmate's workers are autonomous and never address the captain (AGENTS.md:39-41), and decisions route through `ask-user-authority`.
+- **Tool availability** (`which`): `npm` is present (mise node 26.7.0), `git` is present, and `no-mistakes` v1.84.0 is present. The skill's sibling skills `security-and-hardening`, `performance-optimization`, and `constraint-driven-development` are absent from every installed root.
+- **Context cost:**
+  - about 80 tokens of description in every session at an auto-discovered placement
+  - about 5.2k tokens (20,976 bytes) on each load
+  - a dangling-reference follow-up cost if the agent tries to load the missing sibling skills or checklists
+- **Who would load it, by placement:**
+  - trial-only (`pi --skill <path>`): only that Pi session.
+  - a project's `.agents/skills`: Pi crewmates in that project (pi docs/skills.md:61) and, inferred, other `.agents/skills`-reading harnesses. Firstmate's own `.no-mistakes.yaml:10` `disable_project_settings: true` keeps project settings away from gate agents in this repo only; other projects have no such guard (inferred).
+  - user-global `~/.agents/skills` plus `~/.claude/skills`: every Pi and Claude session on the machine, including firstmate itself, ship and scout workers, and, inferred, no-mistakes gate agents running on those harnesses. That would put foreign severity labels into structured review output.
+  - firstmate's own `.agents/skills`: every firstmate home and secondmate. Not applicable, since review is not firstmate-specific behavior.
+
+## 7. Recommendation
+
+Decline (conflict). The facts that settle it:
+
+1. The skill's purpose is a mandatory pre-merge review and approval gate (ext :3, :10, :16, :347-349). That clashes directly with the selected-delivery-path rule (AGENTS.md:229-233) and with merge authority (AGENTS.md:33-34, :241-244). Narrowing the description cannot fix this, because the gate is the body's core, not just its trigger.
+2. Its labels (`Critical:`, `Required`, `Nit:`, `Optional:`, `FYI`, `Approve`, `Request changes`) collide with the tool-owned `error`/`warning`/`info` and `auto-fix`/`ask-user`/`no-op` scales (nm:3170, :3176-3178). Under the rules, a tool-owned prompt is never replaced from here.
+3. Everything that does not clash is already covered by the no-mistakes review prompt or the no-mistakes skill (rows 3, 4, 6, 7, 10, 12, 13, 16, 22).
+4. The two `new` rows are not worth harvesting now:
+   - The file-size signal (row 9) is a soft shape heuristic, and the review prompt deliberately refuses to block on shape alone (nm:3159).
+   - Dependency-upgrade discipline (row 24) has no consuming stack on this machine (section 6). Its only proper home would be a project's no-mistakes review instructions, which belong to the tool's settings and the project, not to firstmate.
+5. The skill is not self-contained. It depends on three missing sibling skills and two out-of-folder checklists (section 2).
+
+What must never come along if any of this is revisited: the "before merging any change" trigger, any approve or request-changes verdict, the foreign severity labels, running tests or mutating code during review, "ask before deleting" addressed to a human, and "require cleanup before submission".
+
+## 8. Captain's decision
+
+None.
+
+## 9. Evidence
+
+### Pinned files (local folder, no git repository)
+
+```
+6f202f8bd568cd730dbb2b0d1f8e243bc74c2fa1f64dbce9b2c7ea08bd5c9fd7  LICENSE   1068 bytes  21 lines   ASCII text
+2db1e850379f255fd3091ef278cde24cd6c7d2ba23e360cc52ea522c40d4396e  SKILL.md  20976 bytes 398 lines  Unicode text, UTF-8 text, with very long lines (433)
+c2575f0c97ba17f3b6e0c29c6c52530ff2abe5ed0f71fe591da5b45b8ee5ec88  SOURCE    545 bytes   10 lines   ASCII text
+git hash-object SKILL.md -> 08209ff2208d2883d48d945f7754c428b77f8d87 (matches SOURCE "git blob")
+git -C <folder> rev-parse HEAD -> fatal: not a git repository
+```
+
+`ls -la` showed only these three files, with no dotfiles. The SKILL.md sha256 matches the `SOURCE` claim.
+
+### Commands and results
+
+- `FM_HOME=$HOME/firstmate python3 bin/fm-skill-surface.py`: 82 lines of output. There is no `code-review-and-quality` entry (`grep -i` exit 1).
+  The same-topic entries are `no-mistakes` (user-agents, auto, 394 lines, 28153 bytes), `no-mistakes` (user-claude, same-content-as:user-agents), and `review-agent` (user-codex, auto, 57 lines, 2661 bytes).
+  Name collisions shown are unrelated (`agent-skill-trigger-index`, `skill-creator`).
+- `python3 bin/fm-skill-surface.py --root ext=<input dir>` -> `ext code-review-and-quality ... auto 398 20976 name!=dir,broad-trigger:any change|before merging`.
+- `fm-skill-surface.py | cut -f2 | grep -nxE 'security-and-hardening|performance-optimization|constraint-driven-development'` -> exit 1 (empty).
+- `ls <input>/../../references/{security,performance}-checklist.md` -> No such file or directory. `find / -xdev -name security-checklist.md -o -name performance-checklist.md` -> empty.
+- `grep -nE 'https?://' SKILL.md` -> exit 1.
+- `grep -nP '[\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{2064}\x{FEFF}\x{E0000}-\x{E007F}]' SKILL.md` -> exit 1. `grep -nE '<!--|[A-Za-z0-9+/]{60,}={0,2}' SKILL.md` -> exit 1.
+- Review prompt: `strings -n 40 "$(readlink -f "$(command -v no-mistakes)")"` (binary `/home/hugo/.no-mistakes/bin/no-mistakes`, `no-mistakes version v1.84.0 (4822244)`). The cited lines 3149-3195 and 2244 are quoted in sections 4 and 5.
+  The output was saved to a temp file under `/tmp/fm-sa-tmp/`, which has since been deleted.
+- `grep -n -iE 'lockfile|changelog|one dependency'` over AGENTS.md, .agents/skills/*/SKILL.md, and ~/.agents/skills/no-mistakes/SKILL.md -> exit 1. Hits in the no-mistakes strings were internal Go symbols only (`LockFile`, `lockFile`).
+- `grep -n -iE 'file size|too large|split it|1000 lines'` over the review-prompt strings -> no review-prompt hits (only runtime and library strings).
+  The firstmate owners have size rules only for AGENTS.md (firstmate-coding-guidelines SKILL.md:56-62).
+- `grep -rn -iE 'mutation|...'` over the firstmate surface: hits are about state mutation only (AGENTS.md:58, :84, and others), none about mutation testing.
+- `which no-mistakes gh-axi pi claude codex npm git curl`: all present.
+- Firstmate code root: `/home/hugo/.no-mistakes/worktrees/3f83383b2e86/01M66J7TBMNGZSZPZQX5FC74XP` at `fe495e48249f54974be64b5217269ffd3e818f7a`. Supervising home used for the surface scan: `$HOME/firstmate`, because `FM_HOME` was unset in this session.
+
+### Not verified, and why
+
+- Upstream commit `28f435e...`, the upstream LICENSE text, and whether the missing references exist upstream: confirming these needs a fetch, which this analysis forbids. Only the blob hash was checked, locally.
+- Whether no-mistakes supports a `review.instructions` setting: inferred from `yaml:"review"` and `yaml:"instructions"` tags in the binary and from the `document.instructions` and `test.instructions` keys in firstmate's `.no-mistakes.yaml:15-50`. Not exercised. It only matters for a future harvest of row 24.
+- Which gate-agent harnesses load user-global skills: inferred. The binary contains `GROK_CLAUDE_SKILLS_ENABLED=false`, which suggests no-mistakes suppresses some skill loading per harness. Behavior for Claude and Pi gate agents was not tested; per the rules, no trial run happens inside an analysis.
+- Completion gate: under the `captain-hold-lifecycle` gate, the reviewed surface leaves nothing waiting on the captain, so the correct call is `bin/fm-captain-hold.sh complete --none` in the originating home. This worker did not run it, because its instructions permit writing only this report outside a temporary directory, and running it would write to that home's backlog.
+exit=1

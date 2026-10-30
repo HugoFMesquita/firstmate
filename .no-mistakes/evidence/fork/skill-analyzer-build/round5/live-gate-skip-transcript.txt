@@ -1,0 +1,6 @@
+$ bash tests/fm-skill-analyzer-live-e2e.test.sh   (no opt-in)
+skip: live: opt-in; set FM_SKILL_ANALYZER_LIVE_E2E=1 to run
+exit=0
+$ FM_LIVE=1 FM_SKILL_ANALYZER_LIVE_E2E=0 FM_SKILL_ANALYZER_TRIGGER_EVAL=0 bash tests/...
+skip: live: disabled by FM_SKILL_ANALYZER_LIVE_E2E=0
+exit=0

@@ -1,0 +1,6 @@
+dangling-refs: verdict ok
+ok - dangling-refs analysis matches expected.json
+review-conflicting: verdict ok
+ok - review-conflicting analysis matches expected.json
+FM_TEST_COMPLETE
+exit=0

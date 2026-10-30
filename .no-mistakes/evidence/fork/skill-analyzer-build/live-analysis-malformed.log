@@ -1,0 +1,4 @@
+malformed: verdict ok
+ok - malformed analysis matches expected.json
+FM_TEST_COMPLETE
+exit=0

@@ -1,0 +1,24 @@
+$ FM_LIVE=1 FM_SKILL_ANALYZER_LIVE_E2E=0 bash tests/fm-skill-analyzer-live-e2e.test.sh
+ok should_trigger rate=1.00 Is this worth installing: https://github.com/example-org/agent-skills/tree/main/skills/changelog-writer
+ok should_trigger rate=1.00 Compare this skill to what we already have: https://raw.githubusercontent.com/example-org/skills/main/pdf-tools/SKILL.md
+ok should_trigger rate=1.00 Can we replace stow with this one? https://github.com/example-org/memory-skills/tree/main/skills/session-sweep
+ok should_trigger rate=1.00 Borrow the good parts of https://github.com/example-org/agent-skills/tree/main/skills/test-review and leave the rest.
+ok should_trigger rate=1.00 Someone recommended addyosmani/agent-skills@code-review-and-quality - should our workers use it?
+ok should_trigger rate=1.00 I downloaded a skill folder to /tmp/new-skill; tell me whether it is safe and useful to add.
+ok should_trigger rate=1.00 Evaluate these three skills for adoption: example-org/skills@lint-fixer, example-org/skills@doc-writer, example-org/skills@git-hygiene
+ok should_trigger rate=1.00 Is the skills.sh entry vercel-labs/agent-skills@web-design-guidelines any good for us, or do we already cover it?
+ok should_trigger rate=1.00 Before I drop this third-party SKILL.md into ~/.agents/skills, check it over: https://github.com/example-org/x/blob/main/SKILL.md
+ok should_trigger rate=1.00 Would this external skill clash with how no-mistakes reviews code? https://github.com/example-org/review-skill
+ok should_not_trigger rate=0.00 Write me a new skill that generates release notes from git tags.
+ok should_not_trigger rate=0.00 Review our own ship-landing skill for clarity and trim it.
+ok should_not_trigger rate=0.00 Install the no-mistakes update.
+ok should_not_trigger rate=0.00 What does /stow do?
+ok should_not_trigger rate=0.00 Fix the typo in the bearings skill description.
+ok should_not_trigger rate=0.00 List which skills firstmate loads at session start.
+ok should_not_trigger rate=0.00 Review this pull request diff for bugs before we merge it.
+ok should_not_trigger rate=0.00 Add a trigger line for captain-hold-lifecycle to the trigger index.
+ok should_not_trigger rate=0.00 Update firstmate to the latest version.
+ok should_not_trigger rate=0.00 Create a skills folder for the fm-sandbox project with a hello-world skill.
+ok - skill-analyzer trigger rates meet the threshold
+FM_TEST_COMPLETE
+exit=0

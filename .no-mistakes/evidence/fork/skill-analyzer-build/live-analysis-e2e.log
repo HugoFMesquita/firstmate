@@ -1,0 +1,181 @@
+good-standalone: verdict ok
+ok - good-standalone analysis matches expected.json
+review-conflicting: harvest item 'mutation' absent from sections 4, 7, and 9
+not ok - review-conflicting: report check failed; report follows
+# Skill analysis: code-review-and-quality (local folder `input/review-conflicting`, vendored from addyosmani/agent-skills@28f435e `skills/code-review-and-quality`)
+
+## 1. Verdict
+
+`harvest` - one piece (a condition-inversion check on new conditions) goes into the no-mistakes Test step's supported `test.instructions` setting, and nothing else comes along; placement is that config line only, never a skill folder; confidence medium - a captain-approved trial showing the inversion check either finds a real missing test (confirms `harvest`) or only adds time (turns this into `decline (conflict)`) would settle it.
+
+## 2. What the skill is
+
+- Source: local folder `/tmp/fm-skill-analyzer-live.OfnExr/review-conflicting/input/review-conflicting`, not a git repository (`git -C <dir> rev-parse HEAD` -> `fatal: not a git repository`), so it is pinned by file hashes only (section 9).
+- Declared upstream (provenance file, not verified by fetch on instruction): `ext SOURCE:4-6` - `https://github.com/addyosmani/agent-skills`, path `skills/code-review-and-quality/SKILL.md`, commit `28f435ea69a78531ec00779c7f3b78c64ce95896`, git blob `08209ff2208d2883d48d945f7754c428b77f8d87`.
+  Local check: `git hash-object SKILL.md` -> `08209ff2208d2883d48d945f7754c428b77f8d87` and `sha256sum` -> `2db1e850...4396e`, both matching `ext SOURCE:6-7`; the declared size `398 lines, 20976 bytes` (`ext SOURCE:8`) matches `wc -lc`.
+- License: no `license` frontmatter field (`ext SKILL.md:1-4`); `ext LICENSE:1-3` is MIT, "Copyright (c) 2025 Addy Osmani", which permits copying with the notice. Harvest here re-derives the idea and copies no text.
+- Frontmatter: `name: code-review-and-quality` (`ext SKILL.md:2`), a `description` (`ext SKILL.md:3`), no `disable-model-invocation`, no non-spec fields.
+  Name-directory mismatch: the folder is `review-conflicting` but the declared name is `code-review-and-quality`. Pi does not enforce this ("Pi neither requires nor warns when the declared name differs from the parent directory", Pi `docs/skills.md:83`), so it is not `malformed` for Pi, but other Agent Skills implementations may reject it and any install would have to rename one side.
+- Size: `SKILL.md` 398 lines, 20976 bytes, 3334 words, about 5,200 tokens per load (bytes / 4); 7 lines over 300 characters, longest 433 (`awk` in section 9), ordinary for prose.
+- Files (all read in full): `SKILL.md` (UTF-8 text), `LICENSE` (ASCII, 21 lines), `SOURCE` (ASCII, 10 lines). No dotfiles, scripts, archives, binaries, images, or bytecode (`ls -la`, `file`).
+- References and whether they resolve:
+  - `security-and-hardening` (`ext SKILL.md:66`, `:302`), `performance-optimization` (`:79`), `constraint-driven-development` (`:164`) - sibling skills; not in the folder and not on the installed surface (`grep -c "<tab><name><tab>" surface.tsv` -> `0` for each). Resolve nowhere.
+  - `../../references/security-checklist.md`, `../../references/performance-checklist.md` (`ext SKILL.md:353-354`) - would escape to `/tmp/fm-skill-analyzer-live.OfnExr/references/`, which does not exist (`ls` -> `No such file or directory`); upstream they sit in the repository outside the skill folder and would not travel. Resolve nowhere.
+  - URLs: none in `SKILL.md`; `ext SOURCE:4` holds the repository URL, not probed because this run forbids fetching.
+- Tools and stack assumed: a runnable test suite (`ext SKILL.md:164`), `npm audit` and `package.json`/lockfiles (`:289`, `:299-302`), a PR workflow with human authors and reviewers (`:183-189`, `:251-258`, `:347-349`).
+- Audience: a human or single agent acting as reviewer and approver of a pull request, with a human making the final call (`ext SKILL.md:221`).
+
+## 3. What firstmate already has on this topic
+
+Topic is review, so the owner is the no-mistakes review prompt plus `AGENTS.md` section 7.
+
+- `AGENTS.md:230` - "When no-mistakes is selected, no-mistakes alone owns review, fixes, tests, documentation, push, PR, and CI; otherwise follow the faster path without adding an independent reviewer."
+- `AGENTS.md:231-232` - never hold work outside no-mistakes for a manual clean verdict or stack serial manual reviews; a separate review only when the captain explicitly requests it.
+- `AGENTS.md:33` (hard rule 2) and `AGENTS.md:241` - merge authority is the captain's, relaxed only by `yolo`.
+- no-mistakes v1.84.0 embedded review prompt, `nm-prompt:3149-3195` (line numbers in `strings -n 40 $(command -v no-mistakes)`, section 9): five-axis-equivalent risk review, severity `error|warning|info` (`:3170`), action `auto-fix|ask-user|no-op` (`:3175-3178`), a dedicated simplification pass (`:3185-3188`), and risk levels (`:3191-3193`).
+- no-mistakes Test, fix, and re-review prompts: `nm-prompt:2332`, `:2542`, `:2653`, `:2698`, `:2989`, `:3017`; commit and PR text prompts `nm-prompt:2360`, `:2608`.
+- `.agents/skills/validation-supervision/SKILL.md:15`, `:24` - scope routing during validation and ask-user routing.
+- `.agents/skills/ask-user-authority/SKILL.md:18-19`, `:23-24`, `:35` - the worker never answers its own finding; reviewer language cannot amend the contract; labels such as "required" are evidence, not authority.
+- `.agents/skills/ship-landing/SKILL.md:11`, `:19-20` - ready signal is checks green; the captain gets the PR URL; merge needs the captain's word or `yolo`.
+- `.agents/skills/firstmate-coding-guidelines/SKILL.md:115-117`, `:119-133` - test-cost policy and repo style rules for firstmate's own repo.
+- Installed same-topic skills outside firstmate: `~/.agents/skills/no-mistakes` (and its byte-identical `~/.claude/skills/no-mistakes`, flagged `same-content-as:user-agents`), and `~/.codex/skills/.system/review-agent/SKILL.md:1-57` (defect-first P0-P3 review, `:48-53`).
+
+## 4. Overlap map
+
+| # | External piece | Firstmate today | Class |
+|---|---|---|---|
+| 1 | `ext SKILL.md:3`, `:14-20` trigger "Use before merging any change", "After completing a feature implementation" | `AGENTS.md:230-232` no-mistakes alone owns review; no independent reviewer | clash |
+| 2 | `ext SKILL.md:10` "Every change gets reviewed before merge — no exceptions" | `AGENTS.md:230-231` | clash |
+| 3 | `ext SKILL.md:12`, `:347-349` approval standard and "Approve — Ready to merge" verdict | `AGENTS.md:33`, `:241`; `ship-landing/SKILL.md:20`; `nm-prompt:3191-3193` risk levels | clash |
+| 4 | `ext SKILL.md:26-34` correctness axis | `nm-prompt:3154`, `:3165`, `:3166` | already-done |
+| 5 | `ext SKILL.md:40-43`, `:46` names, control flow, clever tricks, comments | `nm-prompt:3172-3173` only material issues, no style | noise |
+| 6 | `ext SKILL.md:44-45`, `:48-49` fewer lines, unearned abstractions, bolted-on conditionals | `nm-prompt:3163-3164`, `:3185-3188` simplification pass | already-done |
+| 7 | `ext SKILL.md:55-58` patterns, boundaries, duplication, dependency direction | `nm-prompt:3185` "a second definition of a concept the code already defines once, or a parallel copy of a rule" | already-done |
+| 8 | `ext SKILL.md:59-61`, `:113`, `:398` shape-based "presumptive blockers" (relocated complexity, file past ~1000 lines, feature logic in shared module) | `nm-prompt:3159-3160` no finding from shape alone without a concrete reachable sequence | clash |
+| 9 | `ext SKILL.md:64-75` security axis | `nm-prompt:3155-3157` | already-done |
+| 10 | `ext SKILL.md:77-86` performance axis | `nm-prompt:3165` "performance regressions" | already-done |
+| 11 | `ext SKILL.md:88-101` structural remedies, "propose the move" | `nm-prompt:3158`, `:3179`, `:3186` remedy named in the finding | already-done |
+| 12 | `ext SKILL.md:103-126` change-size thresholds and splitting strategies | `grep -rn -i -E 'lines changed\|split (it\|the change\|large)\|change siz' AGENTS.md .agents/skills` -> empty; scope is set by `AGENTS.md:392` and dispatch `AGENTS.md:203-205` | noise |
+| 13 | `ext SKILL.md:128` separate refactoring from feature work | `AGENTS.md:392` extra sweeps are follow-up work; `nm-prompt:3164` | already-done |
+| 14 | `ext SKILL.md:130-138` change descriptions | `nm-prompt:2360`, `:2608` commit subject and conventional format, tool-owned | already-done |
+| 15 | `ext SKILL.md:142-150` understand intent first | `nm-prompt:3150`; `ask-user-authority/SKILL.md:23` | already-done |
+| 16 | `ext SKILL.md:152-162` review tests first | `nm-prompt:2332`, `:2542` missing-test findings; `:2653` "whether it could still pass with the code wrong" | already-done |
+| 17 | `ext SKILL.md:164` "Invert one condition ... run the suite" inside review | `nm-prompt:3162` "Do NOT run tests during review"; `:2698` no full suite | clash |
+| 18 | `ext SKILL.md:164` idea: a surviving inversion names a missing test | `grep -n -i invert nm-strings.txt` -> 18 hits, all crypto/sqlite symbols; nearest is `nm-prompt:2653` (judgement by reading only) and fail-before/pass-after for regressions (`strings` hit 17168-17169) | new |
+| 19 | `ext SKILL.md:166-177` per-file axis walk | `nm-prompt:3154`, `:3166` | already-done |
+| 20 | `ext SKILL.md:179-191` severity prefixes Required/Critical/Nit/Optional/FYI | `nm-prompt:3170`, `:3175-3178` | clash |
+| 21 | `ext SKILL.md:193` lead with what matters | `nm-prompt:3171-3172` | already-done |
+| 22 | `ext SKILL.md:195-205` verify the verification | `nm-prompt:2989`, `:3017` scenarios and evidence; `ship-landing/SKILL.md:11` | already-done |
+| 23 | `ext SKILL.md:207-231` multi-model review with a separate review agent | `AGENTS.md:231` no stacked serial reviews; the pipeline's reviewer is already a separate agent | clash |
+| 24 | `ext SKILL.md:235-238`, `:241-249` list orphaned code after a change | `nm-prompt:3185-3187` | already-done |
+| 25 | `ext SKILL.md:239` "Ask before deleting" | `AGENTS.md:39-40` hard rule 4; `ask-user-authority/SKILL.md:18-19` | clash |
+| 26 | `ext SKILL.md:251-258` respond within one business day | no human review queue; `grep -rn -i 'business day' AGENTS.md .agents/skills` -> empty | noise |
+| 27 | `ext SKILL.md:260-267` disagreement hierarchy | `ask-user-authority/SKILL.md:23-24`; `firstmate-coding-guidelines/SKILL.md:119-133` | noise |
+| 28 | `ext SKILL.md:269`, `:362` require cleanup before submission | `validation-supervision/SKILL.md:15`; `nm-prompt:3161`, `:3170` | clash |
+| 29 | `ext SKILL.md:271-279` honesty in review | `AGENTS.md:42` hard rule 5; `AGENTS.md:346` | already-done |
+| 30 | `ext SKILL.md:281-292` adding a dependency, `npm audit`, bundle impact | no JS project registered: `ls projects/*` shows only `knoliver/pyproject.toml`, no `package.json` or lockfile | noise |
+| 31 | `ext SKILL.md:294-302` dependency-upgrade discipline (changelog, one per change, lockfile diff) | `grep -rn -i -E 'changelog\|lockfile\|one dependency per' AGENTS.md .agents/skills` -> empty; no lockfile in registered projects | noise |
+| 32 | `ext SKILL.md:304-345` review checklist items | rows 4-22 owners | already-done |
+| 33 | `ext SKILL.md:351-354` See Also links | resolve nowhere (section 2) | noise |
+| 34 | `ext SKILL.md:356-368` rationalizations table | restates rows 2, 8, 28, 31 | noise |
+| 35 | `ext SKILL.md:370-385` red flags, "PRs merged without any review" | `AGENTS.md:230` every no-mistakes ship is reviewed | already-done |
+| 36 | `ext SKILL.md:387-396` post-review verification | `ship-landing/SKILL.md:11` checks green; `nm-prompt:2698` CI owns broad regression | already-done |
+
+Tally: 17 already-done, 9 clash, 1 new, 9 noise (17 of 36 is under four in five, so not `duplicate`).
+
+## 5. Conflicts and safety
+
+Conflict table:
+
+| External text | Firstmate text | Why it clashes |
+|---|---|---|
+| "Use before merging any change." (`ext SKILL.md:3`) and "Every change gets reviewed before merge — no exceptions." (`:10`) | "When no-mistakes is selected, no-mistakes alone owns review, fixes, tests, documentation, push, PR, and CI; otherwise follow the faster path without adding an independent reviewer." (`AGENTS.md:230`) | Adds a second reviewer on every change, touching the selected delivery path. |
+| "Model B reviews for correctness and architecture ... Human makes the final call" (`ext SKILL.md:215-221`) | "Never hold work outside no-mistakes for a manual clean verdict, stack serial manual reviews, or infer authority for one from security, architecture, or risk alone." (`AGENTS.md:231`) | Stacked review outside the pipeline. |
+| "**Approve** — Ready to merge" (`ext SKILL.md:348`); "Approve a change when it definitely improves overall code health" (`:12`) | "Never merge a PR without the captain's explicit word." (`AGENTS.md:33`); "`yolo` is the only standing routine merge authority." (`ship-landing/SKILL.md:20`) | An agent-issued approval reads as merge readiness, touching merge authority. |
+| "**Ask before deleting:** \"Should I remove these now-unused elements: [list]?\"" (`ext SKILL.md:239`) | "**Crewmates never address the captain.**" (`AGENTS.md:39`); "The implementation worker never decides or answers its own ask-user finding." (`ask-user-authority/SKILL.md:18`) | A worker cannot ask a human; that routing belongs to the pipeline's ask-user finding. |
+| "Invert one condition ... run the suite, then restore the file from a copy." (`ext SKILL.md:164`) | "Do NOT run tests during review. The pipeline has a dedicated test step after review." (`nm-prompt:3162`); "Do NOT run the complete repository test suite." (`nm-prompt:2698`) | Runs tests and edits source in the review step. |
+| "Require cleanup before submission unless it's a genuine emergency." (`ext SKILL.md:269`) | "Do not expand user scope or turn optional broader improvements into blockers." (`nm-prompt:3161`); "prefer routing new requirements to follow-up work" (`validation-supervision/SKILL.md:15`) | Turns follow-up cleanup into a blocker, widening scope. |
+| "**Presumptive blockers:** ... a refactor that relocates complexity ...; a change that pushes a file past the size boundary ...; a near-duplicate of an existing canonical helper" (`ext SKILL.md:398`) | "Do not infer a systemic flaw from code shape, duplication, or architectural preference alone." (`nm-prompt:3159`) | Shape-based blocking where the owner requires a concrete reachable path. |
+| "**Nit:** ... formatting, style preferences" (`ext SKILL.md:187`) | "Do NOT report styling, formatting, linting, compilation, or type-checking issues." (`nm-prompt:3173`) | Asks for comments the owner forbids. |
+
+Vocabulary collisions:
+
+- Severity: external `Required` (no prefix, "Must address before merge"), `Critical` ("Blocks merge"), `Nit`, `Optional`/`Consider`, `FYI` (`ext SKILL.md:183-189`, `:230`) against no-mistakes `error`/`warning`/`info` (`nm-prompt:3170`). `Required` has no counterpart: no-mistakes `warning` explicitly "can be done in a follow up", while the external no-prefix default blocks merge. `Nit` has no counterpart because style is excluded (`nm-prompt:3173`). `Required` also collides with `ask-user-authority/SKILL.md:35`, where "required" is evidence, never authority.
+- Action: the external vocabulary has no `auto-fix`/`ask-user`/`no-op` split; "Ask before deleting" (`ext SKILL.md:239`) stands in for `ask-user`, and `FYI` "No action needed" maps loosely to `no-op`.
+- Verdict and status: `Approve` / `Request changes` (`ext SKILL.md:348-349`) against no-mistakes risk `low`/`medium`/`high` (`nm-prompt:3191-3193`) and firstmate's `working`/`needs-decision`/`blocked`/`paused`/`done`/`failed`. "Presumptive blockers" (`ext SKILL.md:398`) collides with firstmate's `blocked`, which means a worker needs firstmate action (`AGENTS.md:279`). "explicitly deferred with justification" (`ext SKILL.md:392`) has no firstmate state.
+
+Safety findings:
+
+- No scripts, binaries, archives, base64 blobs, secrets, zero-width or bidirectional control characters, HTML comments, or fetch-and-execute (section 9 greps: base64 `exit=1`, secrets `exit=1`, zero-width `exit=1`, `<!--` `exit=1`). The `curl|wget|eval|exec|base64` grep matched only `evaluate` at `ext SKILL.md:18`, `:24`, `:266`, which are false positives.
+- Non-ASCII characters are 29 em dashes, 4 `→`, 3 `│`, 3 `▼` (diagram glyphs at `ext SKILL.md:108-110`, `:211-221`), all benign.
+- `SKILL.md` contains no text addressed to an analyzer, reviewer, scanner, or assistant; its "reviewer" hits (`ext SKILL.md:122`, `:126`, `:128`) are ordinary prose about human reviewers.
+- `SOURCE` contains text addressed to the analyzer, copied verbatim: `ext SOURCE:1` "Vendored verbatim, unmodified, as a read-only skill-analyzer test fixture." and `ext SOURCE:2` "The directory name differs from the skill's own name on purpose; the analyzer must flag it."
+  It was not obeyed as an instruction. The name mismatch was established independently from `ext SKILL.md:2` and the folder name (section 2).
+  Inferred, not verified: this is the vendoring note of whoever prepared the fixture, not part of the upstream skill. Its integrity claims hold locally (blob and sha256 match), and it asks for nothing outside the analyzer's own procedure, so it is recorded as reviewer-addressed provenance text and not counted as injection. If the captain treats any analyzer-addressed text as disqualifying, the verdict becomes `decline (unsafe)`.
+- Trigger analysis: the exact description is "Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use when you need to assess code quality across multiple dimensions before it enters the main branch. Use when asked to review a diff or a pull request, even when the diff is pasted inline." (`ext SKILL.md:3`).
+  Broad phrases: `before merging` and `any change` ("Use before merging any change"). "reviewing code written by yourself" also fires on every self-check after an implementation.
+  Same-topic installed descriptions: `no-mistakes` ("Validate your code changes through the no-mistakes pipeline - automated code review, tests, lint, docs, push, PR, and CI ..."), `review-agent` ("Perform a read-only, defect-first review of a specified code change ..."), `validation-supervision`, `ask-user-authority`, `ship-landing` (descriptions in `surface.tsv`, section 9).
+  Model invocation: absent, so the default is automatic invocation; every worker that sees it would load it on every implementation-then-review turn.
+
+## 6. Fit and cost
+
+- Stack: firstmate and `OllieCrew` are Bash repositories, `knoliver` is Python (`pyproject.toml` only), `fm-sandbox` holds only `README.md` (`ls /home/hugo/firstmate/projects/*`). The npm and lockfile material (`ext SKILL.md:281-302`) has no target here.
+- Human-in-the-loop assumptions: a human author who answers questions (`:239`), human review turnaround (`:251-258`), human disagreement resolution (`:260-269`), a human final call (`:221`). Firstmate workers are autonomous and never address the captain (`AGENTS.md:39`).
+- Tool availability: `which npm git node` -> `/home/hugo/.local/share/mise/installs/node/26.7.0/bin/npm`, `/usr/bin/git`, `.../node`; `which pnpm yarn` -> not found. No other tools are named.
+- Context cost: about 85 tokens of always-loaded description (339 bytes) at any automatic placement, plus about 5,200 tokens per load.
+- Who would load it where:
+  - Trial-only: only the session given `pi --skill <path>`.
+  - User-global `~/.agents/skills` plus `~/.claude/skills`: every Pi and Claude Code session on the machine (Pi `docs/skills.md:61`), including every crew worker in every project.
+  - Firstmate `.agents/skills`: every worker in a firstmate worktree.
+  - Whether no-mistakes' own review and fix agents load user-global skills is not verified (section 9). If they do, a user-global copy could push `Critical`/`Nit` labels into pipeline review output.
+- The harvested piece costs one sentence in a Test-step setting and only the time of one focused test run per new condition. That must stay within `firstmate-coding-guidelines/SKILL.md:115-117`, which forbids suite walks in `commands.test`.
+
+## 7. Recommendation
+
+`harvest`, with one piece. Everything else stays out, and specifically none of the clashes in section 5 may come along: the merge-trigger description, the approval verdict, the stacked multi-model review, "Ask before deleting", running the suite inside review, require-cleanup-before-submission, shape-based presumptive blockers, and the Required/Critical/Nit/FYI labels.
+
+1. Condition-inversion check (from `ext SKILL.md:164`, idea re-derived, no text copied).
+   Target owner: the no-mistakes Test step through its supported per-repository setting `test.instructions`, starting with one project's `.no-mistakes.yaml` (firstmate's own file is at `/home/hugo/.no-mistakes/worktrees/3f83383b2e86/01M66J7TBMNGZSZPZQX5FC74XP/.no-mistakes.yaml`, `test.instructions` block). It should not go into a firstmate skill, and the tool's embedded prompt is not replaced; if the trial shows value, also note it for the no-mistakes maintainer.
+   One-sentence rewrite: "For each boolean condition the change adds, temporarily invert it in the run worktree, run only the focused test that should cover it, restore the file byte for byte, and report a warning finding naming the missing test case when that test still passes."
+   Trial: run it as a separate captain-approved task in `projects/fm-sandbox`. That project has no tests today, so seed one small script and test, set the line on the sandbox's default branch, and validate one change twice, with and without it.
+   Pass needs at least one surviving inversion correctly reported as a missing test, restored source with no stray diff, and no full-suite run. Otherwise drop the piece and record this skill as `decline (conflict)`.
+
+## 8. Captain's decision
+
+- A - Harvest the condition-inversion check as one `test.instructions` line, first through a short sandbox trial (recommended).
+- B - Decline outright as conflicting with the pipeline's sole ownership of review and with merge authority; nothing is taken.
+
+Recommended: A.
+
+## 9. Evidence
+
+Pinned file list (`sha256sum`, `wc -lc`, `file`):
+
+```
+6f202f8bd568cd730dbb2b0d1f8e243bc74c2fa1f64dbce9b2c7ea08bd5c9fd7  LICENSE   21 lines  1068 bytes  ASCII text
+2db1e850379f255fd3091ef278cde24cd6c7d2ba23e360cc52ea522c40d4396e  SKILL.md  398 lines 20976 bytes Unicode text, UTF-8 text, with very long lines (433)
+c2575f0c97ba17f3b6e0c29c6c52530ff2abe5ed0f71fe591da5b45b8ee5ec88  SOURCE    10 lines  545 bytes   ASCII text
+git hash-object SKILL.md -> 08209ff2208d2883d48d945f7754c428b77f8d87
+git -C <dir> rev-parse HEAD -> fatal: not a git repository (or any parent up to mount point /)
+ls -la -> only LICENSE, SKILL.md, SOURCE; no dotfiles
+```
+
+Owner reads:
+
+- Firstmate code root `/home/hugo/.no-mistakes/worktrees/3f83383b2e86/01M66J7TBMNGZSZPZQX5FC74XP` at `7314eced92dd7a0f592dc821755e6b25d82f2aa2`. Read in full: `AGENTS.md` sections 1, 7, 8, and 9; `validation-supervision`, `ship-landing`, `ask-user-authority`, `firstmate-coding-guidelines`, and `captain-hold-lifecycle` `SKILL.md`; `.no-mistakes.yaml`; `~/.codex/skills/.system/review-agent/SKILL.md`.
+- no-mistakes: `no-mistakes --version` -> `v1.84.0 (4822244) 2026-09-26T08:30:42Z`; binary sha256 `41fb1c780ef5d204c318eca8fbe73a0a86ae576395b7ae2153e21aacefef0d53`.
+  `strings -n 40 "$(command -v no-mistakes)" > /tmp/fm-sa-tmp/nm-strings.txt` (31398 lines, sha256 `536ade42...64b8b7`); every `nm-prompt:<n>` above is a line of that file.
+  The review prompt starts at `:3149` "Review the code changes and return structured findings with a risk assessment."
+  `strings -n 8 ... | grep -n -A4 'For a regression, reproduce'` -> line 17168-17169 "the test should fail before the fix and pass after it."
+- Surface: `python3 bin/fm-skill-surface.py` with `FM_HOME` unset (no supervising home was given, so the home defaulted to the code root) -> 53 skills, no exact name match (`grep -i -E 'code-review|review-conflicting' surface.tsv` -> `exit=1`), and one unrelated collision (`skill-creator`). This run's copy is at `/tmp/fm-sa-tmp/surface.tsv`; the `surface.tsv` and `surface.err` already present beside this report were not written by this run and were left untouched.
+- Scans on `SKILL.md`: URLs `grep -o -E 'https?://...'` -> only `SOURCE:4`; base64 `[A-Za-z0-9+/=]{40,}` -> `exit=1`; secrets -> `exit=1`; zero-width or bidi -> `exit=1`; `<!--` -> `exit=1`; non-ASCII -> `29 —, 4 →, 3 │, 3 ▼`.
+- Empty searches cited in section 4: `grep -rn -i -E 'lines changed|split (it|the change|large)|change siz' AGENTS.md .agents/skills | grep -v skill-analyzer` -> empty; `grep -rn -i -E 'changelog|lockfile|one dependency per' AGENTS.md .agents/skills | grep -v skill-analyzer` -> empty; `grep -n -i invert nm-strings.txt` -> 18 hits, none in a prompt.
+
+Not verified, and why:
+
+- The upstream commit, path, and license were not fetched or probed with `curl -sI`; this run was told not to fetch. Only local hash consistency with `SOURCE` was checked.
+- Whether no-mistakes gate agents load user-global skills was not tested. That needs a trial run, which belongs in its own captain-approved task.
+- Whether `test.instructions` is honoured from a pushed branch or only from the default branch was not verified. `.no-mistakes.yaml` comments state only `disable_project_settings` is trusted-only, and the string "repo commands/agent loaded from default branch, not pushed branch" (`nm-strings.txt:2100`) suggests the default branch, so the trial plan assumes the default branch.
+- The `captain-hold-lifecycle` completion gate (Tier 1 step 8) was not run. This run may write nothing outside its temporary directory except this report, and `bin/fm-captain-hold.sh hold`/`complete` write to the supervising home's backlog. The one captain call is section 8's A/B choice; firstmate should hold it and run `complete` when it takes this report.
+- No `done` line was written, for the same reason. The verdict for that line is `harvest`.
+exit=1

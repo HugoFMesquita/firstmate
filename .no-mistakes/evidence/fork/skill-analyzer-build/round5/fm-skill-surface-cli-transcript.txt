@@ -1,0 +1,59 @@
+$ python3 bin/fm-skill-surface.py --root trial=tests/fixtures/skill-analyzer
+scope	name	dir	description	model_invocation	lines	bytes	flags
+trial	dangling-refs	tests/fixtures/skill-analyzer/dangling-refs	Write a release checklist for a library before tagging a version. Use when preparing a release of a package.	auto	14	627	-
+trial	good-standalone	tests/fixtures/skill-analyzer/good-standalone	Generate RFC 5545 iCalendar (.ics) files for meetings and reminders. Use when asked to create a calendar invite, an event file, or an .ics attachment from a date, time, and title.	auto	35	1695	-
+trial	injection-bearing	tests/fixtures/skill-analyzer/injection-bearing	Set up a consistent local development environment for new contributors. Use when onboarding a developer onto a repository.	auto	22	1004	-
+trial	tidy-imports	tests/fixtures/skill-analyzer/malformed		auto	13	442	missing-description,name!=dir
+trial	code-review-and-quality	tests/fixtures/skill-analyzer/review-conflicting	Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use when you need to assess code quality across multiple dimensions before it enters the main branch. Use when asked to review a diff or a pull request, even when the diff is pasted inline.	auto	398	20976	name!=dir,broad-trigger:any change|before merging
+exit=0
+
+$ python3 bin/fm-skill-surface.py --json --root trial=tests/fixtures/skill-analyzer | head -c 1200
+{
+ "skills": [
+  {
+   "scope": "trial",
+   "name": "dangling-refs",
+   "dir": "tests/fixtures/skill-analyzer/dangling-refs",
+   "description": "Write a release checklist for a library before tagging a version. Use when preparing a release of a package.",
+   "model_invocation": "auto",
+   "lines": 14,
+   "bytes": 627,
+   "flags": []
+  },
+  {
+   "scope": "trial",
+   "name": "good-standalone",
+   "dir": "tests/fixtures/skill-analyzer/good-standalone",
+   "description": "Generate RFC 5545 iCalendar (.ics) files for meetings and reminders. Use when asked to create a calendar invite, an event file, or an .ics attachment from a date, time, and title.",
+   "model_invocation": "auto",
+   "lines": 35,
+   "bytes": 1695,
+   "flags": []
+  },
+  {
+   "scope": "trial",
+   "name": "injection-bearing",
+   "dir": "tests/fixtures/skill-analyzer/injection-bearing",
+   "description": "Set up a consistent local development environment for new contributors. Use when onboarding a developer onto a repository.",
+   "model_invocation": "auto",
+   "lines": 22,
+   "bytes": 1004,
+   "flags": []
+  },
+  {
+   "scope": "trial",
+   "name": "tidy-imports",
+   "dir": "tests/fixtures/skill-analyzer/malformed",
+   "descr
+$ python3 bin/fm-skill-surface.py   # default roots, first rows
+
+NAME COLLISIONS (distinct content, same name):
+  skill-creator: user-claude=/home/hugo/.claude/skills/synced/de81a69a-f365-4e84-bd9a-33739b0c4bcd_065ebdf1-61a6-4986-9a97-07dcaa1090bd/skill-creator; user-codex=/home/hugo/.codex/skills/.system/skill-creator
+scope	name	dir	description	model_invocation	lines	bytes	flags
+firstmate	afk	/home/hugo/.no-mistakes/worktrees/3f83383b2e86/01M66J7TBMNGZSZPZQX5FC74XP/.agents/skills/afk	Enter the away posture when the captain invokes /afk, says they are going afk, `state/.afk-co
+firstmate	agent-skill-trigger-index	/home/hugo/.no-mistakes/worktrees/3f83383b2e86/01M66J7TBMNGZSZPZQX5FC74XP/.agents/skills/agent-skill-trigger-index	Load only when auditing or maintaining the comple
+firstmate	ahoy	/home/hugo/.no-mistakes/worktrees/3f83383b2e86/01M66J7TBMNGZSZPZQX5FC74XP/.agents/skills/ahoy	Recap visible session events and guide the captain through visibly unanswered decisions whe
+firstmate	ask-user-authority	/home/hugo/.no-mistakes/worktrees/3f83383b2e86/01M66J7TBMNGZSZPZQX5FC74XP/.agents/skills/ask-user-authority	Single owner of ask-user finding policy. Load before deciding a
+firstmate	away-quiet-supervision	/home/hugo/.no-mistakes/worktrees/3f83383b2e86/01M66J7TBMNGZSZPZQX5FC74XP/.agents/skills/away-quiet-supervision	Load whenever /afk or /quiet is invoked, an away or qui
+firstmate	bearings	/home/hugo/.no-mistakes/worktrees/3f83383b2e86/01M66J7TBMNGZSZPZQX5FC74XP/.agents/skills/bearings	Generate a "pick up where I left off" fleet digest. Use when the captain invokes /b
+firstmate	bootstrap-diagnostics	/home/hugo/.no-mistakes/worktrees/3f83383b2e86/01M66J7TBMNGZSZPZQX5FC74XP/.agents/skills/bootstrap-diagnostics	Load when the session-start digest's bootstrap or network

@@ -1,0 +1,8 @@
+good-standalone: verdict ok
+ok - good-standalone analysis matches expected.json
+malformed: verdict ok
+ok - malformed analysis matches expected.json
+injection-bearing: verdict ok
+ok - injection-bearing analysis matches expected.json
+not ok - analysis sessions left the repository unchanged (expected '', got ' M tests/fm-skill-analyzer-live-e2e.test.sh')
+exit=1

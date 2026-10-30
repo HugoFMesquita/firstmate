@@ -1,0 +1,12 @@
+good-standalone: verdict ok
+ok - good-standalone analysis matches expected.json
+review-conflicting: verdict ok
+ok - review-conflicting analysis matches expected.json
+malformed: verdict ok
+ok - malformed analysis matches expected.json
+dangling-refs: verdict ok
+ok - dangling-refs analysis matches expected.json
+injection-bearing: verdict ok
+ok - injection-bearing analysis matches expected.json
+FM_TEST_COMPLETE
+exit=0
