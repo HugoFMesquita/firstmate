@@ -31,7 +31,11 @@ set -u
 # shellcheck source=tests/lib.sh
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-fm_live_gate opt-in FM_SKILL_ANALYZER_LIVE_E2E,FM_SKILL_ANALYZER_TRIGGER_EVAL pi python3 git
+GATE_VARS=''
+for var in FM_SKILL_ANALYZER_LIVE_E2E FM_SKILL_ANALYZER_TRIGGER_EVAL; do
+  [ "${!var:-}" = 0 ] || GATE_VARS+="${GATE_VARS:+,}$var"
+done
+fm_live_gate opt-in "${GATE_VARS:-FM_SKILL_ANALYZER_LIVE_E2E,FM_SKILL_ANALYZER_TRIGGER_EVAL}" pi python3 git
 
 SKILL_DIR="$ROOT/.agents/skills/skill-analyzer"
 CORPUS="$ROOT/tests/fixtures/skill-analyzer"
@@ -122,11 +126,13 @@ def section(n):
     start = positions[n - 1]
     end = positions[n] if n < len(positions) else len(text)
     return text[start:end]
-verdict = section(1).lower()
-def matches(v):
-    return all(tok in verdict for tok in re.findall(r"[a-z]+", v.lower()))
-if not any(matches(v) for v in want["verdicts"]):
-    sys.exit(f"{fixture}: verdict section matches none of {want['verdicts']}: {section(1)[:400]!r}")
+verdict_line = next((l for l in section(1).splitlines()[1:] if l.strip()), "").lower()
+found = re.search(r"\b(adopt|replace|harvest|decline)\b(?:[\s`*()\-:]*\b(duplicate|conflict|unsafe|unfit|malformed|unreachable|unlicensed)\b)?", verdict_line)
+if not found:
+    sys.exit(f"{fixture}: no verdict on the first line of section 1: {verdict_line[:400]!r}")
+verdict = found.group(1) + (f" ({found.group(2)})" if found.group(1) == "decline" and found.group(2) else "")
+if verdict not in [v.lower() for v in want["verdicts"]]:
+    sys.exit(f"{fixture}: verdict {verdict!r} is none of {want['verdicts']}: {verdict_line[:400]!r}")
 # A bare ":N" is a line citation: ":N" itself or any ":a-b" range covering N.
 cited = set()
 for match in re.finditer(r":(\d+)(?:-(\d+))?", text):

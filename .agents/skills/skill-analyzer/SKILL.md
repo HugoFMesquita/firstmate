@@ -35,7 +35,7 @@ These tier models are the captain's choice for this skill, so do not route aroun
 
 ## Tier 0 - triage (delegated agent, read-only, about ten minutes)
 
-Scaffold with `bin/fm-brief.sh <id>-triage OllieCrew --scout`, point `## Firstmate spec` at this file by absolute path and at this section, and spawn with `bin/fm-spawn.sh <id>-triage <firstmate-project-dir> --scout --model anthropic/claude-sonnet-5.5 --effort medium`.
+Scaffold with `bin/fm-brief.sh <id>-triage <firstmate-repo-name> --scout`, point `## Firstmate spec` at this file by absolute path and at this section, and spawn with `bin/fm-spawn.sh <id>-triage <firstmate-project-dir> --scout --model anthropic/claude-sonnet-5.5 --effort medium`.
 The triage agent:
 
 1. Resolves the source to owner, repo, ref, and path; pins the commit with `gh-axi api repos/<o>/<r>/commits/<ref>` and lists the folder with `gh-axi api repos/<o>/<r>/contents/<path>?ref=<sha>`; saves `SKILL.md` to `data/<task-id>/snapshot/<name>/SKILL.md` with `sha256sum`.
@@ -43,7 +43,7 @@ The triage agent:
    A failed fetch is `decline (unreachable)` with the HTTP status; never describe a skill from memory.
 2. Parses the frontmatter: name, description, license, `disable-model-invocation`, non-spec fields; a missing description is `malformed` (Pi will not load it) but reading continues.
 3. Runs `bin/fm-skill-surface.py` (with `FM_HOME` set to the supervising home) for the live surface; notes any exact name match and any `same-content-as` entry.
-4. Scans the external description for broad phrases (`any change`, `before merging`, `always`, `any task`, `whenever`, `every time`) and lists every installed description on the same topic.
+4. Scans the external description for broad phrases (`any change`, `before merging`, `always`, `any task`, `whenever`, `every time`, `all code`) and lists every installed description on the same topic.
 5. Finds the topic's owner: review -> the no-mistakes review prompt (`strings "$(command -v no-mistakes)"`) and `AGENTS.md` section 7; decisions -> `ask-user-authority`; merging -> `ship-landing` and hard rule 2; memory -> `stow`; diagnosis -> `diagnostic-reasoning`; project onboarding -> `project-management`; otherwise none.
 6. Scans the snapshot and listing for non-text files, archives, bytecode, remote fetch-and-execute, base64 blobs, secrets, text aimed at a reviewer or scanner, and a size or bytes-per-line ratio absurd for the stated purpose.
 7. Decides depth: unreachable, unlicensed-to-copy, opaque payloads, remote execution, or injection text -> decline now with citations; an exact content match with an installed skill -> an update question, not an adoption; a new topic with no owner, under about 150 lines and no scripts -> light analysis; anything with an owner, scripts, more size, or a plausible `replace` -> full analysis.
@@ -53,7 +53,7 @@ Firstmate relays the triage outcome to the captain in one message; the captain's
 
 ## Tier 1 - deep analysis (worker)
 
-Scaffold with `bin/fm-brief.sh <id> OllieCrew --scout`, point `## Firstmate spec` at this file by absolute path, the pinned SHA, the triage report, and the depth decision, and spawn with `bin/fm-spawn.sh <id> <firstmate-project-dir> --scout --model anthropic/claude-opus-5.5 --effort high`.
+Scaffold with `bin/fm-brief.sh <id> <firstmate-repo-name> --scout`, point `## Firstmate spec` at this file by absolute path, the pinned SHA, the triage report, and the depth decision, and spawn with `bin/fm-spawn.sh <id> <firstmate-project-dir> --scout --model anthropic/claude-opus-5.5 --effort high`.
 A light analysis is the same worker bounded to about thirty minutes of work.
 Up to ten skills from one repository share one worker, one clone, and one inventory; independent repositories run as parallel workers.
 The worker:
